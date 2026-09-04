@@ -1,0 +1,24 @@
+stay-supplier-hub documentation package
+
+AGENTS.md
+AI_USAGE.md
+JOURNAL.md
+README.md
+docs/API.md
+docs/ARCHITECTURE.md
+docs/DOMAIN.md
+docs/GLOSSARY.md
+docs/INTEGRATION.md
+docs/PERSISTENCE.md
+docs/REQUIREMENTS.md
+docs/USE_CASES.md
+docs/VERIFICATION.md
+
+Validation:
+- accumulated design decisions 1-7 present
+- AGENTS canonical paths resolve to docs/ files
+- checkpoint/stop workflow present
+- Journal/AI record-candidate rules present
+- progressive Requirement→V mapping rule present
+- coherent commit-boundary rule present
+- restricted public-identifying phrase scan passed
