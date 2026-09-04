@@ -1,0 +1,13 @@
+#!/bin/sh
+
+message_file="$1"
+message=$(sed -n '1p' "$message_file")
+
+pattern='^(feat|fix|docs|test|refactor|build|chore|ci|perf|style|revert)\([^)[:space:]]+\): .+$'
+
+if ! printf '%s\n' "$message" | grep -Eq "$pattern"; then
+  echo "Invalid commit subject: $message" >&2
+  echo "Use: type(domain-or-work-part): summary" >&2
+  echo "Example: feat(catalog): add property snapshot reconciliation" >&2
+  exit 1
+fi
