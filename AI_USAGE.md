@@ -504,3 +504,10 @@ BOM 누락도 함께 보완했다.
 검증 결과 Catalog persistence/application 컴파일은 통과했으며, Docker 미가용으로 Testcontainers
 통합 테스트 실행은 보류했다.
 
+## AI-012 — Catalog synchronization transaction boundary
+
+**Date:** 2026-09-05
+
+Supplier I/O와 JPA 반영을 분리하는 `ApplyCatalogSnapshotService` 구조와 PostgreSQL cross-module 검증을
+구현했다. snapshot 롤백, 외부 호출 중 트랜잭션 부재, Supplier별 독립 커밋이 자동 테스트로 통과했다.
+

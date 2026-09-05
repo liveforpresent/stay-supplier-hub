@@ -517,9 +517,9 @@ Transaction boundary belongs to Catalog Application + real persistence adapter.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-CAT-TX-01` | P0 | CROSS_MODULE | Multi-Property snapshot application fails before commit | Entire Supplier snapshot rolled back | PLANNED |
-| `V-CAT-TX-02` | P0 | CROSS_MODULE | Supplier network call occurs | No DB transaction held during HTTP fetch | PLANNED |
-| `V-CAT-TX-03` | P0 | CROSS_MODULE | A reconciliation commits; B later fails | A remains committed; B rolls back independently | PLANNED |
+| `V-CAT-TX-01` | P0 | CROSS_MODULE | Multi-Property snapshot application fails before commit | Entire Supplier snapshot rolled back | PASSING |
+| `V-CAT-TX-02` | P0 | CROSS_MODULE | Supplier network call occurs | No DB transaction held during HTTP fetch | PASSING |
+| `V-CAT-TX-03` | P0 | CROSS_MODULE | A reconciliation commits; B later fails | A remains committed; B rolls back independently | PASSING |
 
 `V-CAT-TX-02` may use transaction instrumentation/spy or a focused integration assertion. Avoid timing-only inference.
 
@@ -1140,6 +1140,15 @@ V-PER-MAP-01 .. V-PER-MAP-02
 V-PER-BASE-01 .. V-PER-BASE-02
 V-PER-READ-01 .. V-PER-READ-03
 → catalog/adapter/persistence/src/test/kotlin/com/staysupplierhub/catalog/adapter/persistence/CatalogPersistenceAdapterTest.kt
+→ PostgreSQL Testcontainers
+```
+
+### Catalog transaction evidence
+
+```text
+DEC-CAT-003
+→ V-CAT-TX-01 .. V-CAT-TX-03
+→ app/src/test/kotlin/com/staysupplierhub/CatalogTransactionBoundaryTest.kt
 → PostgreSQL Testcontainers
 ```
 

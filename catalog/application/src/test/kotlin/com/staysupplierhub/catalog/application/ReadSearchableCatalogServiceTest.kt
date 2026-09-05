@@ -14,13 +14,6 @@ class ReadSearchableCatalogServiceTest {
 
     @Test
     fun `returns an active property with its active room types as a searchable projection`() {
-        val property = property(
-            roomTypes = listOf(
-                roomType(RoomTypeId(10), "active-room", CatalogStatus.ACTIVE),
-                roomType(RoomTypeId(11), "inactive-room", CatalogStatus.INACTIVE),
-            ),
-        )
-
         val result = ReadSearchableCatalogService(FakeReader(expectedProjection)).read()
 
         assertEquals(expectedProjection, result)
