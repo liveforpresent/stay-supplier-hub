@@ -660,13 +660,13 @@ Add architecture tests only where Gradle boundaries cannot express the rule.
 
 | ID | Priority | Method | Rule | Status |
 |---|---|---|---|---|
-| `V-ARCH-01` | P0 | ARCH_STATIC | Domain/API/Port modules do not depend on Spring/JPA/WebClient | PLANNED |
-| `V-ARCH-02` | P0 | ARCH_STATIC | Search does not depend on Catalog internal modules | PLANNED |
-| `V-ARCH-03` | P0 | ARCH_STATIC | Catalog/Search do not depend on concrete Supplier implementations | PLANNED |
-| `V-ARCH-04` | P0 | ARCH_STATIC | Supplier adapters do not depend on Catalog/Search application/adapters | PLANNED |
-| `V-ARCH-05` | P0 | ARCH_STATIC | `:shared:infrastructure` has no Catalog/Search dependency | PLANNED |
-| `V-ARCH-06` | P0 | ARCH_STATIC | Web adapter does not depend on persistence adapter | PLANNED |
-| `V-ARCH-07` | P0 | ARCH_STATIC / review | `:app` contains composition/bootstrap, not business rules | PLANNED |
+| `V-ARCH-01` | P0 | ARCH_STATIC | Domain/API/Port modules do not depend on Spring/JPA/WebClient | PASSING |
+| `V-ARCH-02` | P0 | ARCH_STATIC | Search does not depend on Catalog internal modules | PASSING |
+| `V-ARCH-03` | P0 | ARCH_STATIC | Catalog/Search do not depend on concrete Supplier implementations | PASSING |
+| `V-ARCH-04` | P0 | ARCH_STATIC | Supplier adapters do not depend on Catalog/Search application/adapters | PASSING |
+| `V-ARCH-05` | P0 | ARCH_STATIC | `:shared:infrastructure` has no Catalog/Search dependency | PASSING |
+| `V-ARCH-06` | P0 | ARCH_STATIC | Web adapter does not depend on persistence adapter | PASSING |
+| `V-ARCH-07` | P0 | ARCH_STATIC / review | `:app` contains composition/bootstrap, not business rules | MANUAL-PASS |
 | `V-ARCH-SUP-01` | P0 | ARCH_STATIC / review | `SupplierId` representation inspected | String-backed value object in `:catalog:api`; no closed A/B enum | PLANNED |
 
 ---
@@ -701,9 +701,9 @@ Add architecture tests only where Gradle boundaries cannot express the rule.
 
 | ID | Priority | Method | Verification | Status |
 |---|---|---|---|---|
-| `V-TECH-01` | P0 | BUILD_CHECK | JDK >= 21; project target currently JDK 25 | PLANNED |
+| `V-TECH-01` | P0 | BUILD_CHECK | JDK >= 21; project target currently JDK 25 | PASSING |
 | `V-TECH-02` | P0 | BUILD_CHECK | Spring Boot >= 3.4; project currently 4.1.1 | PLANNED |
-| `V-TECH-03` | P0 | BUILD_CHECK | Gradle/Kotlin DSL build succeeds | PLANNED |
+| `V-TECH-03` | P0 | BUILD_CHECK | Gradle/Kotlin DSL build succeeds | PASSING |
 | `V-TECH-04` | P0 | ARCH_STATIC / dependency review | Supplier HTTP adapters use WebClient | PLANNED |
 | `V-TECH-05` | P0 | BUILD_CHECK | PostgreSQL-backed main application starts | PLANNED |
 | `V-TECH-06` | P0 | BUILD_CHECK | Separate Mock Supplier executable starts | PLANNED |
@@ -1088,6 +1088,23 @@ V-E2E-04
 Do not make implementation class names part of semantic verification IDs.
 
 Agent work updates status/evidence only after the corresponding test/check actually passes.
+
+### Baseline module evidence
+
+```text
+V-ARCH-01 .. V-ARCH-06
+→ verifyModuleBoundaries (root Gradle task)
+
+V-ARCH-07
+→ static review of app/src/main/kotlin/com/staysupplierhub/Application.kt
+
+V-TECH-01, V-TECH-03
+→ ./gradlew.bat check --console=plain --no-daemon
+   (JDK 25 toolchain, multi-module Gradle/Kotlin DSL check)
+```
+
+`V-TECH-02` remains planned until the PostgreSQL-backed application can start.
+`V-TECH-04` remains planned until Supplier adapters make and verify WebClient calls.
 
 ---
 
