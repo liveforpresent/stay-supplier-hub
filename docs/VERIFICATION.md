@@ -143,13 +143,13 @@ Release readiness requires every mandatory P0 scenario to be `PASSING` or `MANUA
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-CAT-DOM-01` | P0 | DOMAIN_UNIT | Existing RoomType reconciled | Existing `RoomTypeId` preserved | PLANNED |
-| `V-CAT-DOM-02` | P0 | DOMAIN_UNIT | New RoomType appears | New ACTIVE RoomType added | PLANNED |
-| `V-CAT-DOM-03` | P0 | DOMAIN_UNIT | Existing RoomType missing | RoomType becomes INACTIVE | PLANNED |
-| `V-CAT-DOM-04` | P0 | DOMAIN_UNIT | INACTIVE RoomType reappears | Same ID becomes ACTIVE | PLANNED |
-| `V-CAT-DOM-05` | P0 | DOMAIN_UNIT | Duplicate SupplierRoomTypeCode in one Property | Reject invalid Aggregate state | PLANNED |
-| `V-CAT-DOM-06` | P0 | DOMAIN_UNIT | Property external identity reused | Same `PropertyId` retained | PLANNED |
-| `V-CAT-DOM-07` | P0 | DOMAIN_UNIT | INACTIVE Property reappears | Same `PropertyId` becomes ACTIVE | PLANNED |
+| `V-CAT-DOM-01` | P0 | DOMAIN_UNIT | Existing RoomType reconciled | Existing `RoomTypeId` preserved | PASSING |
+| `V-CAT-DOM-02` | P0 | DOMAIN_UNIT | New RoomType appears | New ACTIVE RoomType added | PASSING |
+| `V-CAT-DOM-03` | P0 | DOMAIN_UNIT | Existing RoomType missing | RoomType becomes INACTIVE | PASSING |
+| `V-CAT-DOM-04` | P0 | DOMAIN_UNIT | INACTIVE RoomType reappears | Same ID becomes ACTIVE | PASSING |
+| `V-CAT-DOM-05` | P0 | DOMAIN_UNIT | Duplicate SupplierRoomTypeCode in one Property | Reject invalid Aggregate state | PASSING |
+| `V-CAT-DOM-06` | P0 | DOMAIN_UNIT | Property external identity reused | Same `PropertyId` retained | PASSING |
+| `V-CAT-DOM-07` | P0 | DOMAIN_UNIT | INACTIVE Property reappears | Same `PropertyId` becomes ACTIVE | PASSING |
 
 ---
 
@@ -1105,6 +1105,17 @@ V-TECH-01, V-TECH-03
 
 `V-TECH-02` remains planned until the PostgreSQL-backed application can start.
 `V-TECH-04` remains planned until Supplier adapters make and verify WebClient calls.
+
+### Catalog identity domain evidence
+
+```text
+CAT-001, CAT-002, CAT-005
+→ V-CAT-DOM-01 .. V-CAT-DOM-07
+→ catalog/domain/src/test/kotlin/com/staysupplierhub/catalog/domain/PropertyTest.kt
+
+SupplierId representation support
+→ catalog/api/src/test/kotlin/com/staysupplierhub/catalog/api/CatalogIdsTest.kt
+```
 
 ---
 
