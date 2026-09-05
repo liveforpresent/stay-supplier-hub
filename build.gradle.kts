@@ -62,6 +62,8 @@ val allowedProjectDependencies = mapOf(
     ":mock-supplier" to emptySet(),
     ":app" to setOf(
         ":catalog:api",
+        ":catalog:domain",
+        ":catalog:port",
         ":catalog:application",
         ":catalog:adapter:persistence",
         ":search:application",
