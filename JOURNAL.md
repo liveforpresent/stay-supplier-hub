@@ -882,3 +882,13 @@ Commit boundary는 coherent behavior + verification 완료 시점으로 잡고, 
 어댑터 본체와 Catalog application 컴파일은 통과했으며, Docker 미가용으로 PostgreSQL Testcontainers
 통합 테스트는 아직 PASSING으로 올리지 않았다.
 
+## Day 5 — Catalog 동기화 트랜잭션 경계 분리
+
+**Type:** Decision / Verification
+
+Supplier snapshot 조회와 persistence 반영을 분리했다. 조회·검증을 담당하는 서비스는 트랜잭션 없이
+실행하고, `ApplyCatalogSnapshotService`만 동기식 `@Transactional` 메서드에서 reconcile과 저장을 수행한다.
+
+PostgreSQL Testcontainers cross-module 테스트로 한 snapshot의 전체 롤백, Supplier 호출 중 트랜잭션 부재,
+Supplier별 독립 커밋을 검증했다.
+
