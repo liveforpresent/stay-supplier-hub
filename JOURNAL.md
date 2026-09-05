@@ -892,3 +892,14 @@ Supplier snapshot 조회와 persistence 반영을 분리했다. 조회·검증�
 PostgreSQL Testcontainers cross-module 테스트로 한 snapshot의 전체 롤백, Supplier 호출 중 트랜잭션 부재,
 Supplier별 독립 커밋을 검증했다.
 
+## Day 6 — Supplier A Catalog adapter BOM 정렬
+
+**Type:** Problem / Decision
+
+Supplier A Catalog 어댑터를 컴파일하면서 모듈에 Spring Boot BOM이 없어 기존 `spring-boot-starter-webclient`도
+버전을 해석하지 못하는 문제를 확인했다. Supplier A 모듈에 BOM을 명시하고, adapter-local Jackson Kotlin
+역직렬화를 통해 wire DTO를 Catalog-owned snapshot으로 변환하도록 구성했다.
+
+제어 가능한 로컬 HTTP 스텁으로 정상 Catalog snapshot과 중복 Property 코드가 포함된 구조 오류의 fail-closed
+동작을 검증했다.
+

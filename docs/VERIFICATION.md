@@ -305,8 +305,8 @@ Use an in-process controllable HTTP stub for focused adapter tests.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-A-CAT-01` | P0 | SUPPLIER_INTEGRATION | Normal `/a/v1/hotels` response | Neutral complete Catalog snapshot | PLANNED |
-| `V-INT-A-CAT-02` | P0 | SUPPLIER_INTEGRATION | Structurally invalid Catalog | Fail closed; no partial snapshot | PLANNED |
+| `V-INT-A-CAT-01` | P0 | SUPPLIER_INTEGRATION | Normal `/a/v1/hotels` response | Neutral complete Catalog snapshot | PASSING |
+| `V-INT-A-CAT-02` | P0 | SUPPLIER_INTEGRATION | Structurally invalid Catalog | Fail closed; no partial snapshot | PASSING |
 
 ## Availability / Price
 
@@ -338,6 +338,8 @@ Priority/method:
 ```text
 P0 / SUPPLIER_INTEGRATION
 ```
+
+Status: PASSING
 
 ---
 
@@ -1165,6 +1167,16 @@ CAT-003, CAT-004, CAT-005
 → V-CAT-WIRE-01
 → app/src/test/kotlin/com/staysupplierhub/catalog/CatalogRuntimeCompositionTest.kt
 → Kotest + Spring application context
+```
+
+### Supplier A Catalog adapter evidence
+
+```text
+CAT-006, CON-001, CON-004, CON-006
+→ V-INT-A-CAT-01 .. V-INT-A-CAT-02
+→ V-INT-A-ERR-01 (400/401/429/500/503)
+→ integration/supplier-a/src/test/kotlin/com/staysupplierhub/integration/suppliera/SupplierACatalogAdapterTest.kt
+→ controllable local HTTP stub + Kotest
 ```
 
 ### Snowflake infrastructure evidence
