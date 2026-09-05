@@ -547,11 +547,11 @@ Technical generator lives in:
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-ID-01` | P0 | INFRA_UNIT | Generated ID | `> 0` | PLANNED |
-| `V-ID-02` | P0 | INFRA_UNIT | Sequential generation | No duplicates | PLANNED |
-| `V-ID-03` | P0 | INFRA_UNIT | Concurrent generation | No duplicates | PLANNED |
-| `V-ID-04` | P0 | INFRA_UNIT | Invalid nodeId | Reject configuration | PLANNED |
-| `V-ID-05` | P0 | INFRA_UNIT | Clock rollback | Fail according to policy; never silently duplicate | PLANNED |
+| `V-ID-01` | P0 | INFRA_UNIT | Generated ID | `> 0` | PASSING |
+| `V-ID-02` | P0 | INFRA_UNIT | Sequential generation | No duplicates | PASSING |
+| `V-ID-03` | P0 | INFRA_UNIT | Concurrent generation | No duplicates | PASSING |
+| `V-ID-04` | P0 | INFRA_UNIT | Invalid nodeId | Reject configuration | PASSING |
+| `V-ID-05` | P0 | INFRA_UNIT | Clock rollback | Fail according to policy; never silently duplicate | PASSING |
 
 Catalog tests verify semantic behavior:
 
@@ -1123,6 +1123,13 @@ SupplierId representation support
 CAT-003, CAT-004, CAT-005, CAT-006, CAT-007
 → V-CAT-UC-01 .. V-CAT-UC-08
 → catalog/application/src/test/kotlin/com/staysupplierhub/catalog/application/SynchronizeSupplierCatalogServiceTest.kt
+```
+
+### Snowflake infrastructure evidence
+
+```text
+V-ID-01 .. V-ID-05
+→ shared/infrastructure/src/test/kotlin/com/staysupplierhub/shared/infrastructure/id/SnowflakeIdGeneratorTest.kt
 ```
 
 ---
