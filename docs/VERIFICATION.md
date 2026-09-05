@@ -172,14 +172,14 @@ RoomTypeIdGenerator
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-CAT-UC-01` | P0 | APPLICATION_UNIT | First sync into empty Catalog | New stable IDs created; ACTIVE state persisted | PLANNED |
-| `V-CAT-UC-02` | P0 | APPLICATION_UNIT | Same complete snapshot synced again | Existing IDs preserved | PLANNED |
-| `V-CAT-UC-03` | P0 | APPLICATION_UNIT | Existing Property absent from valid complete snapshot | Property becomes INACTIVE | PLANNED |
-| `V-CAT-UC-04` | P0 | APPLICATION_UNIT | INACTIVE Property returns | Same ID reactivated | PLANNED |
-| `V-CAT-UC-05` | P0 | APPLICATION_UNIT | Supplier Catalog fetch fails | State unchanged; no absence inference | PLANNED |
-| `V-CAT-UC-06` | P0 | APPLICATION_UNIT | Snapshot validation fails | No reconciliation/persistence | PLANNED |
-| `V-CAT-UC-07` | P0 | APPLICATION_UNIT | Valid complete empty snapshot | All existing Supplier Properties become INACTIVE | PLANNED |
-| `V-CAT-UC-08` | P1 | APPLICATION_UNIT | One Supplier sync fails independently | No cross-Supplier rollback implication | PLANNED |
+| `V-CAT-UC-01` | P0 | APPLICATION_UNIT | First sync into empty Catalog | New stable IDs created; ACTIVE state persisted | PASSING |
+| `V-CAT-UC-02` | P0 | APPLICATION_UNIT | Same complete snapshot synced again | Existing IDs preserved | PASSING |
+| `V-CAT-UC-03` | P0 | APPLICATION_UNIT | Existing Property absent from valid complete snapshot | Property becomes INACTIVE | PASSING |
+| `V-CAT-UC-04` | P0 | APPLICATION_UNIT | INACTIVE Property returns | Same ID reactivated | PASSING |
+| `V-CAT-UC-05` | P0 | APPLICATION_UNIT | Supplier Catalog fetch fails | State unchanged; no absence inference | PASSING |
+| `V-CAT-UC-06` | P0 | APPLICATION_UNIT | Snapshot validation fails | No reconciliation/persistence | PASSING |
+| `V-CAT-UC-07` | P0 | APPLICATION_UNIT | Valid complete empty snapshot | All existing Supplier Properties become INACTIVE | PASSING |
+| `V-CAT-UC-08` | P1 | APPLICATION_UNIT | One Supplier sync fails independently | No cross-Supplier rollback implication | PASSING |
 
 ---
 
@@ -1115,6 +1115,14 @@ CAT-001, CAT-002, CAT-005
 
 SupplierId representation support
 → catalog/api/src/test/kotlin/com/staysupplierhub/catalog/api/CatalogIdsTest.kt
+```
+
+### Catalog synchronization application evidence
+
+```text
+CAT-003, CAT-004, CAT-005, CAT-006, CAT-007
+→ V-CAT-UC-01 .. V-CAT-UC-08
+→ catalog/application/src/test/kotlin/com/staysupplierhub/catalog/application/SynchronizeSupplierCatalogServiceTest.kt
 ```
 
 ---
