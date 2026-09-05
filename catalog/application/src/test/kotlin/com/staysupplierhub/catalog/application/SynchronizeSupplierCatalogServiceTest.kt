@@ -174,6 +174,8 @@ class SynchronizeSupplierCatalogServiceTest {
         var saveCalls = 0
             private set
 
+        override fun findAll(): List<Property> = properties.toList()
+
         override fun findAllBySupplier(supplierId: SupplierId): List<Property> =
             properties.filter { it.supplierPropertyIdentity.supplierId == supplierId }
 

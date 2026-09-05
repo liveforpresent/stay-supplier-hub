@@ -193,11 +193,11 @@ Q-CAT-01 ReadSearchableCatalog
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-CAT-READ-01` | P0 | APPLICATION_UNIT | ACTIVE Property + ACTIVE RoomType | Published projection returned | PLANNED |
-| `V-CAT-READ-02` | P0 | APPLICATION_UNIT | INACTIVE Property | Excluded | PLANNED |
-| `V-CAT-READ-03` | P0 | APPLICATION_UNIT | ACTIVE Property + INACTIVE RoomType | RoomType excluded | PLANNED |
-| `V-CAT-READ-04` | P0 | APPLICATION_UNIT | Property has no ACTIVE RoomType | Property need not be returned | PLANNED |
-| `V-CAT-READ-05` | P0 | APPLICATION_UNIT | Projection returned | No Aggregate/JPA type exposed | PLANNED |
+| `V-CAT-READ-01` | P0 | APPLICATION_UNIT | ACTIVE Property + ACTIVE RoomType | Published projection returned | PASSING |
+| `V-CAT-READ-02` | P0 | APPLICATION_UNIT | INACTIVE Property | Excluded | PASSING |
+| `V-CAT-READ-03` | P0 | APPLICATION_UNIT | ACTIVE Property + INACTIVE RoomType | RoomType excluded | PASSING |
+| `V-CAT-READ-04` | P0 | APPLICATION_UNIT | Property has no ACTIVE RoomType | Property need not be returned | PASSING |
+| `V-CAT-READ-05` | P0 | APPLICATION_UNIT | Projection returned | No Aggregate/JPA type exposed | PASSING |
 
 ---
 
@@ -1123,6 +1123,14 @@ SupplierId representation support
 CAT-003, CAT-004, CAT-005, CAT-006, CAT-007
 → V-CAT-UC-01 .. V-CAT-UC-08
 → catalog/application/src/test/kotlin/com/staysupplierhub/catalog/application/SynchronizeSupplierCatalogServiceTest.kt
+```
+
+### Catalog published read evidence
+
+```text
+CAT-003, CAT-004, CAT-006, CAT-007, SEA-009
+→ V-CAT-READ-01 .. V-CAT-READ-05
+→ catalog/application/src/test/kotlin/com/staysupplierhub/catalog/application/ReadSearchableCatalogServiceTest.kt
 ```
 
 ### Snowflake infrastructure evidence
