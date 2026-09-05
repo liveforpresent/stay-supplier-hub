@@ -523,6 +523,12 @@ Transaction boundary belongs to Catalog Application + real persistence adapter.
 
 `V-CAT-TX-02` may use transaction instrumentation/spy or a focused integration assertion. Avoid timing-only inference.
 
+## Catalog Runtime Composition
+
+| ID | Priority | Method | Scenario | Expected | Status |
+|---|---|---|---|---|---|
+| `V-CAT-WIRE-01` | P0 | CROSS_MODULE | Configured Snowflake node ID with Catalog persistence/read Ports | Catalog ID Generator Ports and Catalog application services are composed | PASSING |
+
 ## Catalog Bootstrap / Search Readiness
 
 These scenarios verify the operational gate without adding a Search domain state.
@@ -1150,6 +1156,15 @@ DEC-CAT-003
 → V-CAT-TX-01 .. V-CAT-TX-03
 → app/src/test/kotlin/com/staysupplierhub/CatalogTransactionBoundaryTest.kt
 → PostgreSQL Testcontainers
+```
+
+### Catalog runtime composition evidence
+
+```text
+CAT-003, CAT-004, CAT-005
+→ V-CAT-WIRE-01
+→ app/src/test/kotlin/com/staysupplierhub/catalog/CatalogRuntimeCompositionTest.kt
+→ Kotest + Spring application context
 ```
 
 ### Snowflake infrastructure evidence
