@@ -1,3 +1,7 @@
 spring:
   application:
     name: stay-supplier-hub
+
+stay-supplier-hub:
+  catalog:
+    snowflake-node-id: ${SNOWFLAKE_NODE_ID}
