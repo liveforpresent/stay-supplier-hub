@@ -511,3 +511,11 @@ BOM 누락도 함께 보완했다.
 Supplier I/O와 JPA 반영을 분리하는 `ApplyCatalogSnapshotService` 구조와 PostgreSQL cross-module 검증을
 구현했다. snapshot 롤백, 외부 호출 중 트랜잭션 부재, Supplier별 독립 커밋이 자동 테스트로 통과했다.
 
+## AI-013 — Catalog runtime composition and Kotest introduction
+
+**Date:** 2026-09-05
+
+사용자 요청에 따라 기존 JUnit 5 테스트를 전환하지 않고, 새 카탈로그 런타임 조립 검증에 Kotest를
+점진 도입했다. `:app`에서 Snowflake 기술 구현을 Catalog ID Generator Port로 바인딩하고, application
+서비스 조립을 검증하는 방향을 선택했다.
+
