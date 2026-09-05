@@ -519,3 +519,11 @@ Supplier I/O와 JPA 반영을 분리하는 `ApplyCatalogSnapshotService` 구조�
 점진 도입했다. `:app`에서 Snowflake 기술 구현을 Catalog ID Generator Port로 바인딩하고, application
 서비스 조립을 검증하는 방향을 선택했다.
 
+## AI-014 — Supplier A Catalog adapter verification
+
+**Date:** 2026-09-06
+
+승인된 Supplier A wire contract를 바탕으로 Catalog adapter와 로컬 HTTP 스텁 검증을 구현했다. AI가
+WebClient의 Kotlin DTO 역직렬화 경로와 모듈 BOM 누락을 진단했고, 명시적 Jackson Kotlin mapper를 사용해
+wire DTO를 adapter 내부에 유지하면서 neutral Catalog snapshot으로 정규화하는 방안을 제안했다.
+
