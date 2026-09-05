@@ -495,19 +495,19 @@ Do not substitute H2.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-PER-MAP-01` | P0 | PERSISTENCE_INTEGRATION | Domain Property with RoomTypes persisted/reloaded | Semantically equivalent Aggregate state | PLANNED |
-| `V-PER-MAP-02` | P0 | PERSISTENCE_INTEGRATION | Reconciliation read | ACTIVE + INACTIVE state rehydrated | PLANNED |
+| `V-PER-MAP-01` | P0 | PERSISTENCE_INTEGRATION | Domain Property with RoomTypes persisted/reloaded | Semantically equivalent Aggregate state | PASSING |
+| `V-PER-MAP-02` | P0 | PERSISTENCE_INTEGRATION | Reconciliation read | ACTIVE + INACTIVE state rehydrated | PASSING |
 | `V-PER-MAP-03` | P1 | PERSISTENCE_INTEGRATION | Many Properties with RoomTypes loaded | No N+1 query pattern | PLANNED |
-| `V-PER-BASE-01` | P0 | PERSISTENCE_INTEGRATION | Supplier has only INACTIVE persisted Catalog rows | `hasPersistedCatalogState=true` | PLANNED |
-| `V-PER-BASE-02` | P0 | PERSISTENCE_INTEGRATION | Supplier has no persisted Catalog rows | `hasPersistedCatalogState=false` | PLANNED |
+| `V-PER-BASE-01` | P0 | PERSISTENCE_INTEGRATION | Supplier has only INACTIVE persisted Catalog rows | `hasPersistedCatalogState=true` | PASSING |
+| `V-PER-BASE-02` | P0 | PERSISTENCE_INTEGRATION | Supplier has no persisted Catalog rows | `hasPersistedCatalogState=false` | PASSING |
 
 ## Search projection
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-PER-READ-01` | P0 | PERSISTENCE_INTEGRATION | ACTIVE Property + ACTIVE RoomType | Returned | PLANNED |
-| `V-PER-READ-02` | P0 | PERSISTENCE_INTEGRATION | INACTIVE Property | Excluded | PLANNED |
-| `V-PER-READ-03` | P0 | PERSISTENCE_INTEGRATION | ACTIVE Property + INACTIVE RoomType | RoomType excluded | PLANNED |
+| `V-PER-READ-01` | P0 | PERSISTENCE_INTEGRATION | ACTIVE Property + ACTIVE RoomType | Returned | PASSING |
+| `V-PER-READ-02` | P0 | PERSISTENCE_INTEGRATION | INACTIVE Property | Excluded | PASSING |
+| `V-PER-READ-03` | P0 | PERSISTENCE_INTEGRATION | ACTIVE Property + INACTIVE RoomType | RoomType excluded | PASSING |
 
 ---
 
@@ -1131,6 +1131,16 @@ CAT-003, CAT-004, CAT-005, CAT-006, CAT-007
 CAT-003, CAT-004, CAT-006, CAT-007, SEA-009
 → V-CAT-READ-01 .. V-CAT-READ-05
 → catalog/application/src/test/kotlin/com/staysupplierhub/catalog/application/ReadSearchableCatalogServiceTest.kt
+```
+
+### Catalog persistence evidence
+
+```text
+V-PER-MAP-01 .. V-PER-MAP-02
+V-PER-BASE-01 .. V-PER-BASE-02
+V-PER-READ-01 .. V-PER-READ-03
+→ catalog/adapter/persistence/src/test/kotlin/com/staysupplierhub/catalog/adapter/persistence/CatalogPersistenceAdapterTest.kt
+→ PostgreSQL Testcontainers
 ```
 
 ### Snowflake infrastructure evidence
