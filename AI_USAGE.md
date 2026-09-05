@@ -493,3 +493,14 @@ next major slice to an explicit user decision.
 - `docs/VERIFICATION.md` includes agent-harness review scenarios.
 - Canonical document paths in `AGENTS.md` resolve to `docs/...` files.
 
+## AI-011 — Catalog persistence projection boundary
+
+**Date:** 2026-09-05
+
+Aggregate 전체 조회를 사용하는 공개 조회 구현을 canonical architecture에 맞는
+`SearchableCatalogReader` projection 경계로 수정했다. persistence 모듈 컴파일에서 발견된 Spring Boot
+BOM 누락도 함께 보완했다.
+
+검증 결과 Catalog persistence/application 컴파일은 통과했으며, Docker 미가용으로 Testcontainers
+통합 테스트 실행은 보류했다.
+

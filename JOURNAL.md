@@ -870,3 +870,15 @@ Commit boundary는 coherent behavior + verification 완료 시점으로 잡고, 
 - 의미 있는 commit boundary 기준을 추가했다.
 - canonical document 경로를 실제 `docs/` 구조와 일치시켰다.
 
+## Day 4 — Catalog 검색 projection과 persistence 경계 정렬
+
+**Type:** Problem / Decision
+
+공개 조회를 실제 persistence 계층으로 연결하면서 Aggregate 전체를 읽어 application에서 필터링하는
+방식이 canonical architecture의 projection 경계와 맞지 않음을 확인했다. 조회 서비스는
+`SearchableCatalogReader` 포트만 의존하고, persistence adapter가 ACTIVE Property/RoomType projection을
+제공하도록 정렬했다. persistence 모듈의 Spring Boot BOM 누락도 컴파일 단계에서 보완했다.
+
+어댑터 본체와 Catalog application 컴파일은 통과했으며, Docker 미가용으로 PostgreSQL Testcontainers
+통합 테스트는 아직 PASSING으로 올리지 않았다.
+
