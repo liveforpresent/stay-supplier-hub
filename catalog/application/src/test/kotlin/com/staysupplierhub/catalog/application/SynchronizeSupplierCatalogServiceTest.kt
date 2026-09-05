@@ -136,9 +136,11 @@ class SynchronizeSupplierCatalogServiceTest {
     private fun service(repository: FakePropertyRepository, vararg outcomes: Pair<SupplierId, SupplierCatalogOutcome>) =
         SynchronizeSupplierCatalogService(
             supplierCatalogPorts = outcomes.associate { (supplierId, outcome) -> supplierId to SupplierCatalogPort { outcome } },
-            propertyRepository = repository,
-            propertyIdGenerator = SequencePropertyIdGenerator(),
-            roomTypeIdGenerator = SequenceRoomTypeIdGenerator(),
+            applyCatalogSnapshotService = ApplyCatalogSnapshotService(
+                propertyRepository = repository,
+                propertyIdGenerator = SequencePropertyIdGenerator(),
+                roomTypeIdGenerator = SequenceRoomTypeIdGenerator(),
+            ),
         )
 
     private fun success(snapshot: SupplierCatalogSnapshot) = SupplierCatalogOutcome.Success(snapshot)
