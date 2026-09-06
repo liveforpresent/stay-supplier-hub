@@ -903,3 +903,17 @@ Supplier A Catalog 어댑터를 컴파일하면서 모듈에 Spring Boot BOM이 
 제어 가능한 로컬 HTTP 스텁으로 정상 Catalog snapshot과 중복 Property 코드가 포함된 구조 오류의 fail-closed
 동작을 검증했다.
 
+## Day 7 — 연결 거부 테스트에서 포트 예약과 실제 거부의 차이
+
+**Type:** Verification / Test-fixture correction
+
+Supplier B Availability Adapter의 `CONNECTION_FAILED` 검증에서 `HttpServer.create(...)`로 포트만 예약하고
+시작하지 않은 서버를 사용했다. 이 상태에서는 TCP 연결이 즉시 거부되지 않고 연결이 성립한 뒤 응답을
+기다릴 수 있어 테스트가 대기했다.
+
+테스트 fixture는 서버를 시작한 뒤 즉시 중지하도록 변경했다. 따라서 운영체제가 포트를 해제하고 WebClient가
+실제 connection-refused 오류를 받으며, Adapter의 `CONNECTION_FAILED` 정규화를 결정적으로 검증한다.
+
+이 수정 후 `:integration:supplier-b:cleanTest :integration:supplier-b:test`가 통과했고,
+`V-RES-CONN-01`을 PASSING으로 갱신했다.
+
