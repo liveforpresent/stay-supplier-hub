@@ -591,3 +591,12 @@ prove the configured upper bound, more than one active request, sharing of one l
 calls, and the default bound of five without relying on elapsed-time assertions. The focused Supplier B test suite
 passed after the addition.
 
+## AI-021 — Supplier B Catalog adapter
+
+**Date:** 2026-09-06
+
+AI-assisted implementation added the Supplier B Catalog adapter behind the Catalog-owned Port. It translates the
+body-level `resultCode`, preserves valid empty complete snapshots, and fails closed for missing or duplicate
+Catalog structure so no partial snapshot reaches reconciliation. Local HTTP-stub tests verified normal mapping,
+empty snapshot semantics, structural failure, and body-level `E503` normalization.
+

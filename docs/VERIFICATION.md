@@ -345,6 +345,14 @@ Status: PASSING
 
 # 12. Supplier B Integration Verification
 
+## Catalog
+
+| ID | Priority | Method | Scenario | Expected | Status |
+|---|---|---|---|---|---|
+| `V-INT-B-CAT-01` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `0000` complete Catalog response | Neutral complete Catalog snapshot | PASSING |
+| `V-INT-B-CAT-02` | P0 | SUPPLIER_INTEGRATION | Structurally invalid successful Catalog response | Fail closed; no partial snapshot | PASSING |
+| `V-INT-B-CAT-03` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E503` Catalog response | `SERVICE_UNAVAILABLE` | PASSING |
+
 ## Request translation
 
 | ID | Priority | Method | Scenario | Expected | Status |
@@ -923,6 +931,7 @@ CON Supplier A protocol/price
 → V-INT-A-ERR-01
 
 CON Supplier B protocol/resultCode/price
+→ V-INT-B-CAT-01..03
 → V-INT-B-PROTO-*
 → V-INT-B-PRICE-*
 
@@ -1250,6 +1259,15 @@ SEA-001, SEA-008, SEA-009, RES-003
 CON-002
 → V-INT-B-REQ-01 .. V-INT-B-REQ-03
 → integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityClientTest.kt
+→ controllable local HTTP stub + Kotest
+```
+
+### Supplier B catalog evidence
+
+```text
+CON-001, CON-005, CON-006
+→ V-INT-B-CAT-01 .. V-INT-B-CAT-03
+→ integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBCatalogAdapterTest.kt
 → controllable local HTTP stub + Kotest
 ```
 
