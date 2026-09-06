@@ -5,3 +5,18 @@ spring:
 stay-supplier-hub:
   catalog:
     snowflake-node-id: ${SNOWFLAKE_NODE_ID}
+
+supplier-integration:
+  suppliers:
+    A:
+      base-url: ${SUPPLIER_A_BASE_URL:http://localhost:9090}
+      api-key: ${SUPPLIER_A_API_KEY:local-mock-a-key}
+      connection-timeout: 1s
+      response-timeout: 2s
+      batch-concurrency: 5
+    B:
+      base-url: ${SUPPLIER_B_BASE_URL:http://localhost:9090}
+      api-key: ${SUPPLIER_B_API_KEY:local-mock-b-key}
+      connection-timeout: 1s
+      response-timeout: 2s
+      batch-concurrency: 5

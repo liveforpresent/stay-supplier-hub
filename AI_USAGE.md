@@ -600,3 +600,16 @@ body-level `resultCode`, preserves valid empty complete snapshots, and fails clo
 Catalog structure so no partial snapshot reaches reconciliation. Local HTTP-stub tests verified normal mapping,
 empty snapshot semantics, structural failure, and body-level `E503` normalization.
 
+## AI-022 — Runtime Supplier configuration and wiring
+
+**Date:** 2026-09-06
+
+사용자가 승인한 map 기반 `supplier-integration.suppliers` 계약을 바탕으로, AI가 `:app` Composition
+Root에 설정 바인딩, Supplier별 WebClient 생성, 명시적 Catalog/Availability Port map 조립, 그리고
+fail-fast 집합 일치 검증을 구현했다. 기존 wiring ID의 의미를 보존하고 독립 설정 바인딩과 직접
+SupplierId 변환에는 `V-WIRE-SUP-06..07`을 새로 배정했다.
+
+실행 가능한 wiring 테스트도 추가했지만, 이 작업 환경의 Gradle 클라이언트가 task 로그와 결과 파일을
+남기지 않은 채 종료되어 아직 실행 증거를 얻지 못했다. 따라서 관련 `V-WIRE-SUP-*` 상태는 PLANNED로
+유지한다.
+

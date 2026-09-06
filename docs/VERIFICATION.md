@@ -696,6 +696,8 @@ Add architecture tests only where Gradle boundaries cannot express the rule.
 | `V-WIRE-SUP-03` | P0 | CROSS_MODULE | Configured Supplier has no Availability Port | Application bootstrap fails fast before Catalog sync/Search | PLANNED |
 | `V-WIRE-SUP-04` | P1 | APPLICATION_UNIT / review | Construct `SupplierId("C")` without changing shared identity code | Valid identifier; support still absent until adapter/config registration | PLANNED |
 | `V-WIRE-SUP-05` | P1 | APPLICATION_UNIT | Blank SupplierId | Rejected by value-object invariant | PLANNED |
+| `V-WIRE-SUP-06` | P1 | CROSS_MODULE / CONFIG_BINDING | Supplier A and B use different runtime values | Each Supplier client/adapter receives only its own configuration | PLANNED |
+| `V-WIRE-SUP-07` | P1 | APPLICATION_UNIT / CONFIG_BINDING | Configuration key `A` converts to runtime identity | Exactly `SupplierId("A")`; no normalization or enum mapping | PLANNED |
 
 ---
 
@@ -945,7 +947,7 @@ CON partial normalization
 CON-007
 DEC-CON-001
 → V-ARCH-SUP-01
-→ V-WIRE-SUP-01..05
+→ V-WIRE-SUP-01..07
 ```
 
 ---
