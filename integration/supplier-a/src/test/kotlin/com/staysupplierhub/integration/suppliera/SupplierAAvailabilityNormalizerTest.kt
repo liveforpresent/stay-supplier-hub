@@ -66,6 +66,24 @@ class SupplierAAvailabilityNormalizerTest : FunSpec({
         completed.items.size shouldBe 1
         completed.failures.map { it.type } shouldBe listOf(SearchSupplierFailureType.INVALID_RESPONSE)
     }
+
+    test("a non-empty payload with no normalizable item fails as an invalid response") {
+        val payload = """{ "items": [${item(hotelCode = "", dailyRates = validDailyRates())}] }"""
+
+        normalizer().normalize(payload, condition()).shouldBeInvalidResponse()
+    }
+
+    test("an empty successful payload remains a successful empty batch") {
+        val outcome = normalizer().normalize("""{ "items": [] }""", condition())
+
+        val completed = outcome.shouldBeInstanceOf<SupplierAvailabilityOutcome.Completed>()
+        completed.items shouldBe emptyList()
+        completed.failures shouldBe emptyList()
+    }
+
+    test("a malformed response envelope fails as an invalid response") {
+        normalizer().normalize("""{ "items": "not-an-array" }""", condition()).shouldBeInvalidResponse()
+    }
 })
 
 private fun normalizer() = SupplierAAvailabilityNormalizer(jacksonObjectMapper())
