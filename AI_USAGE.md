@@ -544,3 +544,12 @@ Verification: `:search:application:cleanTest :search:application:test :search:ap
 ten application tests, including a CountDownLatch barrier proving both Supplier groups enter before release.
 `verifyModuleBoundaries` also passed.
 
+## AI-016 — Supplier B availability request translation
+
+**Date:** 2026-09-06
+
+AI-assisted implementation added the Supplier B request client under the Search-owned availability Port boundary.
+It preserves the supplied stay period and guest composition, sends comma-separated `propertyIds`, enforces the
+50-target request limit, and keeps Supplier-specific HTTP details inside the adapter. A local HTTP stub verified
+the API key and request translation; all four focused tests passed.
+

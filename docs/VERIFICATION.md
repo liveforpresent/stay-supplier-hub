@@ -349,9 +349,9 @@ Status: PASSING
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-B-REQ-01` | P0 | SUPPLIER_INTEGRATION | Supplier B request | `X-Api-Key` included | PLANNED |
-| `V-INT-B-REQ-02` | P0 | SUPPLIER_INTEGRATION | Dates/guests supplied | Values preserved | PLANNED |
-| `V-INT-B-REQ-03` | P0 | SUPPLIER_INTEGRATION | Targets supplied | Correct `propertyIds` transmitted | PLANNED |
+| `V-INT-B-REQ-01` | P0 | SUPPLIER_INTEGRATION | Supplier B request | `X-Api-Key` included | PASSING |
+| `V-INT-B-REQ-02` | P0 | SUPPLIER_INTEGRATION | Dates/guests supplied | Values preserved | PASSING |
+| `V-INT-B-REQ-03` | P0 | SUPPLIER_INTEGRATION | Targets supplied | Correct `propertyIds` transmitted | PASSING |
 
 ## Protocol resultCode
 
@@ -1242,6 +1242,15 @@ SEA-001, SEA-008, SEA-009, RES-003
 → V-SEA-CON-01 .. V-SEA-CON-02
 → search/application/src/test/kotlin/com/staysupplierhub/search/application/SearchStaysServiceTest.kt
 → fake Catalog/Supplier Ports; CountDownLatch concurrency barrier
+```
+
+### Supplier B availability request evidence
+
+```text
+CON-002
+→ V-INT-B-REQ-01 .. V-INT-B-REQ-03
+→ integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityClientTest.kt
+→ controllable local HTTP stub + Kotest
 ```
 
 ### Snowflake infrastructure evidence
