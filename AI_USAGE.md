@@ -527,3 +527,20 @@ Supplier I/O와 JPA 반영을 분리하는 `ApplyCatalogSnapshotService` 구조�
 WebClient의 Kotlin DTO 역직렬화 경로와 모듈 BOM 누락을 진단했고, 명시적 Jackson Kotlin mapper를 사용해
 wire DTO를 adapter 내부에 유지하면서 neutral Catalog snapshot으로 정규화하는 방안을 제안했다.
 
+## AI-015 — Search application result composition
+
+**Date:** 2026-09-06
+
+AI-assisted implementation completed the approved Search application slice. The accepted approach keeps
+`StayOffer` as a Search-domain value while exposing `SearchStaysUseCase` and `SearchOutcome` through the
+Search inbound Port. The application reads only Catalog's published contract, executes Supplier groups with
+structured coroutines, joins external codes to Catalog identities, and preserves partial results.
+
+The implementation records an `INVALID_RESPONSE` fact for an unmapped, occupancy-incompatible, or
+invalid-inventory item without discarding valid siblings. Catalog names and occupancy remain the only metadata
+source because the Supplier Port does not carry competing metadata.
+
+Verification: `:search:application:cleanTest :search:application:test :search:application:check` passed with
+ten application tests, including a CountDownLatch barrier proving both Supplier groups enter before release.
+`verifyModuleBoundaries` also passed.
+
