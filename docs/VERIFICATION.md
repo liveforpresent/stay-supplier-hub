@@ -445,7 +445,7 @@ maxObservedConcurrency > 1
 |---|---|---|---|---|---|
 | `V-INT-CON-01` | P0 | SUPPLIER_INTEGRATION | Many batches | Concurrent requests never exceed configured limit | PASSING |
 | `V-INT-CON-02` | P0 | SUPPLIER_INTEGRATION | Multiple batches | More than one batch may progress concurrently | PASSING |
-| `V-INT-CON-03` | P1 | SUPPLIER_INTEGRATION | A/B configured differently | Each Supplier respects its own limit | PLANNED |
+| `V-INT-CON-03` | P1 | CROSS_MODULE | A/B configured differently | Each Supplier respects its own limit | PASSING |
 | `V-INT-CON-04` | P0 | SUPPLIER_INTEGRATION | Concurrent customer Searches target the same Supplier | Combined in-flight requests across Searches never exceed the one shared Supplier limit | PASSING |
 | `V-INT-CON-05` | P1 | BUILD_CHECK / APPLICATION_UNIT | No explicit concurrency override | Supplier batch concurrency binds to default `5` | PASSING |
 
@@ -462,7 +462,7 @@ Per-request timeout and complete Supplier execution latency must remain distinct
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-LAT-01` | P0 | SUPPLIER_INTEGRATION / DOC_REVIEW | More batches than concurrency permits; upstream stalls | Active calls respect per-request timeout; no claim that the complete Supplier execution finishes within one timeout interval | PLANNED |
+| `V-INT-LAT-01` | P0 | SUPPLIER_INTEGRATION / DOC_REVIEW | More batches than concurrency permits; upstream stalls | Active calls respect per-request timeout; no claim that the complete Supplier execution finishes within one timeout interval | PASSING |
 | `V-INT-LAT-02` | P1 | DOC_REVIEW | Production evolution reviewed | Supplier-level execution deadline is documented as a future option, not a current SLA | PLANNED |
 
 ---
@@ -485,6 +485,8 @@ response timeout = 100ms
 
 Evidence: `:integration:supplier-a:test --tests com.staysupplierhub.integration.suppliera.SupplierAAvailabilityAdapterTest`.
 `V-RES-TIMEOUT-02` evidence: `:search:application:test --tests com.staysupplierhub.search.application.SearchStaysServiceTest`.
+`V-INT-CON-03` evidence: `:app:test --tests com.staysupplierhub.supplier.SupplierRuntimeConfigurationTest`.
+`V-INT-LAT-01` evidence: `:integration:supplier-b:test --tests com.staysupplierhub.integration.supplierb.SupplierBAvailabilityAdapterTest`.
 
 ---
 
