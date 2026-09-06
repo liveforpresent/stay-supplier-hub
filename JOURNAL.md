@@ -917,3 +917,14 @@ Supplier B Availability Adapter의 `CONNECTION_FAILED` 검증에서 `HttpServer.
 이 수정 후 `:integration:supplier-b:cleanTest :integration:supplier-b:test`가 통과했고,
 `V-RES-CONN-01`을 PASSING으로 갱신했다.
 
+## Day 7 — Supplier B Catalog 검증 추적 보완
+
+**Type:** Verification traceability
+
+Supplier B Catalog의 complete snapshot 및 fail-closed 규칙은 canonical integration 계약에 있었지만,
+검증 매트릭스에는 Supplier B Availability와 달리 이를 직접 소유하는 `V-*` 시나리오가 없었다.
+
+정상 `0000` snapshot, 구조 오류의 partial-snapshot 금지, HTTP 200 + `E503`의 typed failure를
+`V-INT-B-CAT-01..03`으로 명시했다. 이 변경은 계약 의미를 추가하지 않고, Supplier B Catalog Adapter의
+구현·테스트·요구사항을 추적 가능하게 만든다.
+
