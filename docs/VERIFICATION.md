@@ -470,7 +470,7 @@ response timeout = 100ms
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
 | `V-RES-TIMEOUT-01` | P0 | SUPPLIER_INTEGRATION | Connected upstream never responds | `TIMEOUT` | PLANNED |
-| `V-RES-CONN-01` | P0 | SUPPLIER_INTEGRATION | Connection refused/unreachable | `CONNECTION_FAILED` | PLANNED |
+| `V-RES-CONN-01` | P0 | SUPPLIER_INTEGRATION | Connection refused/unreachable | `CONNECTION_FAILED` | PASSING |
 | `V-RES-TIMEOUT-02` | P0 | APPLICATION_UNIT | One Supplier timeout + one succeeds | Successful Supplier result preserved | PLANNED |
 
 ---
@@ -1261,6 +1261,16 @@ CON-004, SEA-003
 → V-INT-B-PRICE-01 .. V-INT-B-PRICE-02
 → integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityNormalizerTest.kt
 → Supplier B envelope/resultCode and price normalization tests
+```
+
+### Supplier B availability adapter evidence
+
+```text
+CON-004, RES connection failure
+→ V-INT-B-PROTO-06
+→ V-RES-CONN-01
+→ integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityAdapterTest.kt
+→ controllable local HTTP stub and refused-connection verification
 ```
 
 ### Snowflake infrastructure evidence

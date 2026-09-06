@@ -562,3 +562,13 @@ and interprets the body-level `resultCode` before data enters Search. Known Supp
 Search-owned failure taxonomy; successful data preserves the whole-stay `totalPrice` and requires
 `taxIncluded=true` without fabricating a nightly or tax breakdown. Eight focused normalization tests passed.
 
+## AI-018 — Supplier B adapter and connection-failure verification
+
+**Date:** 2026-09-06
+
+AI-assisted implementation composed the Supplier B HTTP client and normalizer into the Search-owned availability
+Port. The adapter normalizes HTTP status, body-level `resultCode`, invalid request size, and refused connections
+without leaking WebClient failures upward. During verification, a merely bound but unstarted HTTP server accepted
+TCP connections and caused an unintended wait; the fixture now starts and stops the server before the request so
+the port is genuinely refused. The clean Supplier B test run passed with 17 tests.
+
