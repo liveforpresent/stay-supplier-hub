@@ -479,9 +479,11 @@ response timeout = 100ms
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-RES-TIMEOUT-01` | P0 | SUPPLIER_INTEGRATION | Connected upstream never responds | `TIMEOUT` | PLANNED |
+| `V-RES-TIMEOUT-01` | P0 | SUPPLIER_INTEGRATION | Connected upstream never responds | `TIMEOUT` | PASSING |
 | `V-RES-CONN-01` | P0 | SUPPLIER_INTEGRATION | Connection refused/unreachable | `CONNECTION_FAILED` | PASSING |
 | `V-RES-TIMEOUT-02` | P0 | APPLICATION_UNIT | One Supplier timeout + one succeeds | Successful Supplier result preserved | PLANNED |
+
+Evidence: `:integration:supplier-a:test --tests com.staysupplierhub.integration.suppliera.SupplierAAvailabilityAdapterTest`.
 
 ---
 

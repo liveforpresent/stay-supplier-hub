@@ -625,3 +625,12 @@ AI가 A/B에 서로 다른 로컬 HTTP stub URL과 API key를 주입한 실제 S
 추가했다. 각 Availability Port가 자신의 endpoint와 credential만 사용함을 확인해
 `V-WIRE-SUP-06`을 PASSING으로 갱신했다.
 
+## AI-024 — Netty response timeout 정규화
+
+**Date:** 2026-09-06
+
+AI가 connected-but-stalled HTTP stub과 100ms test-only response timeout을 사용해 Supplier A Availability
+Adapter를 검증했다. 실제 Netty `ReadTimeoutException`이 기존 Java `TimeoutException` 분기에서 누락되어
+`CONNECTION_FAILED`로 잘못 정규화되는 결함을 확인했고, 원인 체인에서 두 timeout 유형을 모두
+`TIMEOUT`으로 정규화하도록 수정했다.
+
