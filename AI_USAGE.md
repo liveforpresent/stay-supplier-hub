@@ -572,3 +572,13 @@ without leaking WebClient failures upward. During verification, a merely bound b
 TCP connections and caused an unintended wait; the fixture now starts and stops the server before the request so
 the port is genuinely refused. The clean Supplier B test run passed with 17 tests.
 
+## AI-019 — Supplier B batch preservation
+
+**Date:** 2026-09-06
+
+AI-assisted implementation extended the Supplier B adapter from one-request handling to Supplier-owned batching.
+Targets are split at the integration request limit, and a shared per-adapter semaphore provides the configured
+upper bound without encoding the limit in Search. Batch outcomes are merged so successful items remain available
+when another batch fails. Focused HTTP-stub tests verified 50, 51, and 121 target shapes plus middle-batch failure
+preservation.
+

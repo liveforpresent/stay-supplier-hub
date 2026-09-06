@@ -404,10 +404,10 @@ Core example:
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-BATCH-01` | P0 | SUPPLIER_INTEGRATION | 1–50 targets | One request | PLANNED |
-| `V-INT-BATCH-02` | P0 | SUPPLIER_INTEGRATION | 51 targets | Two requests; no batch > 50 | PLANNED |
-| `V-INT-BATCH-03` | P0 | SUPPLIER_INTEGRATION | 121 targets | `50,50,21` | PLANNED |
-| `V-INT-BATCH-04` | P0 | SUPPLIER_INTEGRATION | Middle batch fails, others succeed | Successful items preserved | PLANNED |
+| `V-INT-BATCH-01` | P0 | SUPPLIER_INTEGRATION | 1–50 targets | One request | PASSING |
+| `V-INT-BATCH-02` | P0 | SUPPLIER_INTEGRATION | 51 targets | Two requests; no batch > 50 | PASSING |
+| `V-INT-BATCH-03` | P0 | SUPPLIER_INTEGRATION | 121 targets | `50,50,21` | PASSING |
+| `V-INT-BATCH-04` | P0 | SUPPLIER_INTEGRATION | Middle batch fails, others succeed | Successful items preserved | PASSING |
 
 If batching implementation is shared internally, exhaustive chunk tests may live once at that implementation; each Supplier adapter still retains a request-limit integration smoke test.
 
@@ -1271,6 +1271,15 @@ CON-004, RES connection failure
 → V-RES-CONN-01
 → integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityAdapterTest.kt
 → controllable local HTTP stub and refused-connection verification
+```
+
+### Supplier B batching evidence
+
+```text
+SEA-011, RES batch-level partial failure
+→ V-INT-BATCH-01 .. V-INT-BATCH-04
+→ integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityAdapterTest.kt
+→ local HTTP stub validates 50/50+1/50+50+21 requests and preserved successful batches
 ```
 
 ### Snowflake infrastructure evidence
