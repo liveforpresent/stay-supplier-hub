@@ -582,3 +582,12 @@ upper bound without encoding the limit in Search. Batch outcomes are merged so s
 when another batch fails. Focused HTTP-stub tests verified 50, 51, and 121 target shapes plus middle-batch failure
 preservation.
 
+## AI-020 — Supplier B shared batch concurrency verification
+
+**Date:** 2026-09-06
+
+AI-assisted verification added a controlled in-flight HTTP stub for the Supplier B adapter. CountDownLatch barriers
+prove the configured upper bound, more than one active request, sharing of one limiter across concurrent Search
+calls, and the default bound of five without relying on elapsed-time assertions. The focused Supplier B test suite
+passed after the addition.
+

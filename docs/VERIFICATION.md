@@ -433,11 +433,11 @@ maxObservedConcurrency > 1
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-CON-01` | P0 | SUPPLIER_INTEGRATION | Many batches | Concurrent requests never exceed configured limit | PLANNED |
-| `V-INT-CON-02` | P0 | SUPPLIER_INTEGRATION | Multiple batches | More than one batch may progress concurrently | PLANNED |
+| `V-INT-CON-01` | P0 | SUPPLIER_INTEGRATION | Many batches | Concurrent requests never exceed configured limit | PASSING |
+| `V-INT-CON-02` | P0 | SUPPLIER_INTEGRATION | Multiple batches | More than one batch may progress concurrently | PASSING |
 | `V-INT-CON-03` | P1 | SUPPLIER_INTEGRATION | A/B configured differently | Each Supplier respects its own limit | PLANNED |
-| `V-INT-CON-04` | P0 | SUPPLIER_INTEGRATION | Concurrent customer Searches target the same Supplier | Combined in-flight requests across Searches never exceed the one shared Supplier limit | PLANNED |
-| `V-INT-CON-05` | P1 | BUILD_CHECK / APPLICATION_UNIT | No explicit concurrency override | Supplier batch concurrency binds to default `5` | PLANNED |
+| `V-INT-CON-04` | P0 | SUPPLIER_INTEGRATION | Concurrent customer Searches target the same Supplier | Combined in-flight requests across Searches never exceed the one shared Supplier limit | PASSING |
+| `V-INT-CON-05` | P1 | BUILD_CHECK / APPLICATION_UNIT | No explicit concurrency override | Supplier batch concurrency binds to default `5` | PASSING |
 
 Do not assert exact coroutine scheduling order.
 
@@ -1280,6 +1280,15 @@ SEA-011, RES batch-level partial failure
 → V-INT-BATCH-01 .. V-INT-BATCH-04
 → integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityAdapterTest.kt
 → local HTTP stub validates 50/50+1/50+50+21 requests and preserved successful batches
+```
+
+### Supplier B batch concurrency evidence
+
+```text
+SEA-011
+→ V-INT-CON-01, V-INT-CON-02, V-INT-CON-04, V-INT-CON-05
+→ integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityAdapterTest.kt
+→ CountDownLatch barrier validates configured bound, actual parallelism, shared adapter limiter, and default 5
 ```
 
 ### Snowflake infrastructure evidence
