@@ -257,16 +257,16 @@ SupplierAvailabilityPort B
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-SEA-UC-01` | P0 | APPLICATION_UNIT | A success + B success | `Result`, no failures | PLANNED |
-| `V-SEA-UC-02` | P0 | APPLICATION_UNIT | A success + B failure | A Offers preserved; partial Result | PLANNED |
-| `V-SEA-UC-03` | P0 | APPLICATION_UNIT | A failure + B success | B Offers preserved; partial Result | PLANNED |
-| `V-SEA-UC-04` | P0 | APPLICATION_UNIT | A failure + B failure | `Unavailable` | PLANNED |
-| `V-SEA-UC-05` | P0 | APPLICATION_UNIT | No searchable Catalog target | `Result([],[])`; Supplier Ports not invoked | PLANNED |
-| `V-SEA-UC-06` | P0 | APPLICATION_UNIT | A legitimate empty + B failure | Partial `Result([], failures)` | PLANNED |
-| `V-SEA-UC-07` | P0 | APPLICATION_UNIT | Unknown Supplier RoomType code | Invalid item dropped; valid siblings preserved | PLANNED |
-| `V-SEA-UC-08` | P0 | APPLICATION_UNIT | Guest count exceeds MaxOccupancy | Offer not produced | PLANNED |
-| `V-SEA-UC-09` | P0 | APPLICATION_UNIT | Valid item with zero full-stay availability | StayOffer retained with `availableRooms=0` | PLANNED |
-| `V-SEA-UC-10` | P0 | APPLICATION_UNIT | Availability metadata conflicts with Catalog | Catalog metadata remains authoritative | PLANNED |
+| `V-SEA-UC-01` | P0 | APPLICATION_UNIT | A success + B success | `Result`, no failures | PASSING |
+| `V-SEA-UC-02` | P0 | APPLICATION_UNIT | A success + B failure | A Offers preserved; partial Result | PASSING |
+| `V-SEA-UC-03` | P0 | APPLICATION_UNIT | A failure + B success | B Offers preserved; partial Result | PASSING |
+| `V-SEA-UC-04` | P0 | APPLICATION_UNIT | A failure + B failure | `Unavailable` | PASSING |
+| `V-SEA-UC-05` | P0 | APPLICATION_UNIT | No searchable Catalog target | `Result([],[])`; Supplier Ports not invoked | PASSING |
+| `V-SEA-UC-06` | P0 | APPLICATION_UNIT | A legitimate empty + B failure | Partial `Result([], failures)` | PASSING |
+| `V-SEA-UC-07` | P0 | APPLICATION_UNIT | Unknown Supplier RoomType code | Invalid item dropped; valid siblings preserved | PASSING |
+| `V-SEA-UC-08` | P0 | APPLICATION_UNIT | Guest count exceeds MaxOccupancy | Offer not produced | PASSING |
+| `V-SEA-UC-09` | P0 | APPLICATION_UNIT | Valid item with zero full-stay availability | StayOffer retained with `availableRooms=0` | PASSING |
+| `V-SEA-UC-10` | P0 | APPLICATION_UNIT | Availability metadata conflicts with Catalog | Catalog metadata remains authoritative | PASSING |
 
 ---
 
@@ -284,8 +284,8 @@ B starts ──┘
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-SEA-CON-01` | P0 | APPLICATION_UNIT | Search has A and B targets | Both Supplier executions enter before either is released | PLANNED |
-| `V-SEA-CON-02` | P0 | APPLICATION_UNIT | A fails while B executes | Failure does not cancel/discard B | PLANNED |
+| `V-SEA-CON-01` | P0 | APPLICATION_UNIT | Search has A and B targets | Both Supplier executions enter before either is released | PASSING |
+| `V-SEA-CON-02` | P0 | APPLICATION_UNIT | A fails while B executes | Failure does not cancel/discard B | PASSING |
 
 ---
 
@@ -1232,6 +1232,16 @@ SEA-003, SEA-004
 → V-SEA-PRICE-01 .. V-SEA-PRICE-02
 → search/domain/src/test/kotlin/com/staysupplierhub/search/domain/StayPriceTest.kt
 → Kotlin domain unit tests
+```
+
+### Search application evidence
+
+```text
+SEA-001, SEA-008, SEA-009, RES-003
+→ V-SEA-UC-01 .. V-SEA-UC-10
+→ V-SEA-CON-01 .. V-SEA-CON-02
+→ search/application/src/test/kotlin/com/staysupplierhub/search/application/SearchStaysServiceTest.kt
+→ fake Catalog/Supplier Ports; CountDownLatch concurrency barrier
 ```
 
 ### Snowflake infrastructure evidence
