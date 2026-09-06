@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":shared:infrastructure"))
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-webclient")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation(project(":catalog:domain"))

@@ -520,6 +520,42 @@ default `Map<String, Bean>` autowiring behavior, because the required key is the
 
 The supported Supplier set is determined here, not by a central enum.
 
+## Runtime Supplier Configuration
+
+`:app` binds one map-based configuration namespace:
+
+```yaml
+supplier-integration:
+  suppliers:
+    A:
+      base-url: ${SUPPLIER_A_BASE_URL:http://localhost:9090}
+      api-key: ${SUPPLIER_A_API_KEY:local-mock-a-key}
+      connection-timeout: 1s
+      response-timeout: 2s
+      batch-concurrency: 5
+```
+
+`supplier-integration.suppliers` map keys are the configured Supplier set. A key is converted directly to
+`SupplierId`; there is no separate supported-Supplier list, enabled flag, key normalization, alias, or enum.
+Each configured entry requires an absolute base URL, non-blank API key, positive connection/response timeouts,
+and `batchConcurrency >= 1`. Invalid configuration fails application startup.
+
+`:app` creates independent Supplier A/B WebClient instances from their own settings, constructs concrete adapters,
+and explicitly assembles `Map<SupplierId, SupplierCatalogPort>` and
+`Map<SupplierId, SupplierAvailabilityPort>`. API keys are externalized and must not be logged or committed;
+the local mock defaults are non-secret fixtures only.
+
+At startup:
+
+```text
+configuredSupplierIds
+= Catalog Port keys
+= Availability Port keys
+```
+
+A mismatch fails before Catalog bootstrap or customer Search. Runtime property binding is verified by
+`V-WIRE-SUP-06..07`; composition integrity remains `V-WIRE-SUP-01..03`.
+
 Conceptually:
 
 ```text
