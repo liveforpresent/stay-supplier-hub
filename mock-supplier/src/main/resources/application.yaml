@@ -1,0 +1,6 @@
+server:
+  port: 9090
+
+mock-supplier:
+  a-availability-mode: NORMAL
+  b-search-mode: NORMAL
