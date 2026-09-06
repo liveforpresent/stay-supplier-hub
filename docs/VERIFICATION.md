@@ -634,16 +634,18 @@ Keep verification shallow.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-MCK-01` | P0 | COMPONENT_TEST | Supplier A catalog normal | Valid A catalog response | PLANNED |
-| `V-MCK-02` | P0 | COMPONENT_TEST | Supplier B catalog normal | Valid B catalog response | PLANNED |
-| `V-MCK-03` | P0 | COMPONENT_TEST | A availability normal | Normal response | PLANNED |
-| `V-MCK-04` | P0 | COMPONENT_TEST | A availability supplier-error | Declared error behavior | PLANNED |
-| `V-MCK-05` | P0 | COMPONENT_TEST | A availability no-response | Response intentionally withheld | PLANNED |
-| `V-MCK-06` | P0 | COMPONENT_TEST | B search normal | `resultCode=0000` | PLANNED |
-| `V-MCK-07` | P0 | COMPONENT_TEST | B search supplier-error | Non-`0000` resultCode | PLANNED |
-| `V-MCK-08` | P0 | COMPONENT_TEST | B search no-response | Response intentionally withheld | PLANNED |
+| `V-MCK-01` | P0 | COMPONENT_TEST | Supplier A catalog normal | Valid A catalog response | PASSING |
+| `V-MCK-02` | P0 | COMPONENT_TEST | Supplier B catalog normal | Valid B catalog response | PASSING |
+| `V-MCK-03` | P0 | COMPONENT_TEST | A availability normal | Normal response | PASSING |
+| `V-MCK-04` | P0 | COMPONENT_TEST | A availability supplier-error | Declared error behavior | PASSING |
+| `V-MCK-05` | P0 | COMPONENT_TEST | A availability no-response | Response intentionally withheld | PASSING |
+| `V-MCK-06` | P0 | COMPONENT_TEST | B search normal | `resultCode=0000` | PASSING |
+| `V-MCK-07` | P0 | COMPONENT_TEST | B search supplier-error | Non-`0000` resultCode | PASSING |
+| `V-MCK-08` | P0 | COMPONENT_TEST | B search no-response | Response intentionally withheld | PASSING |
 
 Catalog endpoints need no error mode unless later required.
+
+Evidence: `:mock-supplier:test --tests com.staysupplierhub.mocksupplier.MockSupplierControllerTest`.
 
 ---
 
