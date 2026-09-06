@@ -12,6 +12,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import io.netty.handler.timeout.ReadTimeoutException
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -60,7 +61,7 @@ class SupplierBAvailabilityAdapter(
             failure(exception.statusCode.value().toFailureType())
         } catch (exception: WebClientRequestException) {
             failure(
-                if (exception.cause is TimeoutException) {
+                if (exception.hasTimeoutCause()) {
                     SearchSupplierFailureType.TIMEOUT
                 } else {
                     SearchSupplierFailureType.CONNECTION_FAILED
@@ -87,6 +88,10 @@ class SupplierBAvailabilityAdapter(
 
     private fun failure(type: SearchSupplierFailureType): SupplierAvailabilityOutcome.Failed =
         SupplierAvailabilityOutcome.Failed(listOf(SearchSupplierFailure(type)))
+
+    private fun Throwable.hasTimeoutCause(): Boolean =
+        generateSequence(this) { it.cause }
+            .any { it is TimeoutException || it is ReadTimeoutException }
 
     private companion object {
         const val MAX_PROPERTY_CODES = 50

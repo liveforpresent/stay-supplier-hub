@@ -25,6 +25,10 @@ import org.springframework.context.support.registerBean
 import org.springframework.core.env.MapPropertySource
 import java.net.InetSocketAddress
 import java.time.LocalDate
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class SupplierRuntimeConfigurationTest : FunSpec({
     test("V-WIRE-SUP-01: configured Suppliers have matching Catalog and Availability Port maps") {
@@ -71,11 +75,45 @@ class SupplierRuntimeConfigurationTest : FunSpec({
             }
         }
     }
+
+    test("V-INT-CON-03: Supplier A and B each respect their configured batch concurrency") {
+        ConcurrencyRuntimeSupplierStub("/a/v1/availability", supplierAResponse, expectedInitialRequests = 1).use { supplierA ->
+            ConcurrencyRuntimeSupplierStub("/b/api/search", supplierBResponse, expectedInitialRequests = 2).use { supplierB ->
+                supplierContext(
+                    supplierABaseUrl = supplierA.baseUrl,
+                    supplierBBaseUrl = supplierB.baseUrl,
+                    supplierABatchConcurrency = "1",
+                    supplierBBatchConcurrency = "2",
+                ).use { context ->
+                    val ports = availabilityPorts(context)
+                    val supplierASearch = Thread {
+                        ports.getValue(SupplierId("A")).search(targets(*(1..121).map { "hotel-$it" }.toTypedArray()), condition())
+                    }.apply { start() }
+                    val supplierBSearch = Thread {
+                        ports.getValue(SupplierId("B")).search(targets(*(1..121).map { "property-$it" }.toTypedArray()), condition())
+                    }.apply { start() }
+
+                    supplierA.awaitInitialRequests()
+                    supplierB.awaitInitialRequests()
+                    supplierA.maxObservedConcurrency.get() shouldBe 1
+                    supplierB.maxObservedConcurrency.get() shouldBe 2
+                    supplierA.releaseRequests()
+                    supplierB.releaseRequests()
+                    supplierASearch.join(5_000)
+                    supplierBSearch.join(5_000)
+                    supplierASearch.isAlive shouldBe false
+                    supplierBSearch.isAlive shouldBe false
+                }
+            }
+        }
+    }
 })
 
 private fun supplierContext(
     supplierABaseUrl: String = "http://supplier-a.test",
     supplierBBaseUrl: String = "http://supplier-b.test",
+    supplierABatchConcurrency: String = "5",
+    supplierBBatchConcurrency: String = "2",
 ): AnnotationConfigApplicationContext = AnnotationConfigApplicationContext().also { context ->
     context.environment.propertySources.addFirst(
         MapPropertySource(
@@ -85,12 +123,12 @@ private fun supplierContext(
                 "supplier-integration.suppliers.A.api-key" to "mock-a",
                 "supplier-integration.suppliers.A.connection-timeout" to "1s",
                 "supplier-integration.suppliers.A.response-timeout" to "2s",
-                "supplier-integration.suppliers.A.batch-concurrency" to "5",
+                "supplier-integration.suppliers.A.batch-concurrency" to supplierABatchConcurrency,
                 "supplier-integration.suppliers.B.base-url" to supplierBBaseUrl,
                 "supplier-integration.suppliers.B.api-key" to "mock-b",
                 "supplier-integration.suppliers.B.connection-timeout" to "3s",
                 "supplier-integration.suppliers.B.response-timeout" to "4s",
-                "supplier-integration.suppliers.B.batch-concurrency" to "2",
+                "supplier-integration.suppliers.B.batch-concurrency" to supplierBBatchConcurrency,
             ),
         ),
     )
@@ -115,7 +153,7 @@ private fun runtimeProperties() = SupplierRuntimeProperties(
     batchConcurrency = 1,
 )
 
-private fun targets(code: String) = listOf(SupplierPropertyTarget(SupplierPropertyCode(code)))
+private fun targets(vararg codes: String) = codes.map { SupplierPropertyTarget(SupplierPropertyCode(it)) }
 
 private fun condition() = SearchCondition(
     stayPeriod = StayPeriod(LocalDate.parse("2026-09-01"), LocalDate.parse("2026-09-04")),
@@ -143,6 +181,53 @@ private class RuntimeSupplierStub(
 
     override fun close() {
         server.stop(0)
+    }
+}
+
+private class ConcurrencyRuntimeSupplierStub(
+    path: String,
+    private val response: String,
+    expectedInitialRequests: Int,
+) : AutoCloseable {
+    private val executor = Executors.newCachedThreadPool()
+    private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
+        executor = this@ConcurrencyRuntimeSupplierStub.executor
+        createContext(path) { exchange -> respond(exchange) }
+        start()
+    }
+    private val initialRequests = CountDownLatch(expectedInitialRequests)
+    private val release = CountDownLatch(1)
+    private val inFlight = AtomicInteger(0)
+    val maxObservedConcurrency = AtomicInteger(0)
+    val baseUrl = "http://127.0.0.1:${server.address.port}"
+
+    fun awaitInitialRequests() {
+        check(initialRequests.await(5, TimeUnit.SECONDS)) { "expected batch requests did not enter" }
+    }
+
+    fun releaseRequests() {
+        release.countDown()
+    }
+
+    private fun respond(exchange: HttpExchange) {
+        val active = inFlight.incrementAndGet()
+        maxObservedConcurrency.updateAndGet { maxOf(it, active) }
+        initialRequests.countDown()
+        try {
+            check(release.await(5, TimeUnit.SECONDS)) { "test did not release batch requests" }
+            val body = response.toByteArray()
+            exchange.responseHeaders.add("Content-Type", "application/json")
+            exchange.sendResponseHeaders(200, body.size.toLong())
+            exchange.responseBody.use { it.write(body) }
+        } finally {
+            inFlight.decrementAndGet()
+        }
+    }
+
+    override fun close() {
+        release.countDown()
+        server.stop(0)
+        executor.shutdownNow()
     }
 }
 

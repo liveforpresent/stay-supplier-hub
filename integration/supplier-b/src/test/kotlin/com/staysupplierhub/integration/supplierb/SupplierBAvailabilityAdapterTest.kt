@@ -13,10 +13,13 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
 import java.net.InetSocketAddress
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.time.LocalDate
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
@@ -93,6 +96,32 @@ class SupplierBAvailabilityAdapterTest : FunSpec({
             failed(SearchSupplierFailureType.CONNECTION_FAILED)
     }
 
+    test("a connected upstream that does not respond becomes a timeout") {
+        NoResponseStub(expectedRequests = 1).use { stub ->
+            timeoutAdapter(stub.baseUrl).search(targets("property-a"), condition()) shouldBe
+                failed(SearchSupplierFailureType.TIMEOUT)
+
+            stub.awaitRequests()
+        }
+    }
+
+    test("queued batches each receive their own response timeout") {
+        NoResponseStub(expectedRequests = 3).use { stub ->
+            var outcome: SupplierAvailabilityOutcome? = null
+            val worker = Thread {
+                outcome = timeoutAdapter(stub.baseUrl, maxBatchConcurrency = 1)
+                    .search(targets(*(1..121).map { "property-$it" }.toTypedArray()), condition())
+            }.apply { start() }
+
+            stub.awaitRequests()
+            worker.join(5_000)
+            worker.isAlive shouldBe false
+            outcome shouldBe SupplierAvailabilityOutcome.Failed(
+                List(3) { SearchSupplierFailure(SearchSupplierFailureType.TIMEOUT) },
+            )
+        }
+    }
+
     test("batch requests never exceed configured concurrency and more than one may progress") {
         ConcurrencyStub(expectedInitialRequests = 2).use { stub ->
             val worker = Thread {
@@ -145,6 +174,16 @@ class SupplierBAvailabilityAdapterTest : FunSpec({
 
 private fun adapter(baseUrl: String, maxBatchConcurrency: Int = 5) = SupplierBAvailabilityAdapter(
     webClient = WebClient.builder().baseUrl(baseUrl).build(),
+    apiKey = "test-api-key",
+    objectMapper = jacksonObjectMapper(),
+    maxBatchConcurrency = maxBatchConcurrency,
+)
+
+private fun timeoutAdapter(baseUrl: String, maxBatchConcurrency: Int = 5) = SupplierBAvailabilityAdapter(
+    webClient = WebClient.builder()
+        .baseUrl(baseUrl)
+        .clientConnector(ReactorClientHttpConnector(HttpClient.create().responseTimeout(Duration.ofMillis(100))))
+        .build(),
     apiKey = "test-api-key",
     objectMapper = jacksonObjectMapper(),
     maxBatchConcurrency = maxBatchConcurrency,
@@ -238,6 +277,39 @@ private class ConcurrencyStub(
             exchange.responseBody.use { it.write(body) }
         } finally {
             inFlight.decrementAndGet()
+        }
+    }
+
+    override fun close() {
+        release.countDown()
+        server.stop(0)
+        executor.shutdownNow()
+    }
+}
+
+private class NoResponseStub(
+    expectedRequests: Int,
+) : AutoCloseable {
+    private val executor = Executors.newCachedThreadPool()
+    private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
+        executor = this@NoResponseStub.executor
+        createContext("/b/api/search") { exchange -> respond(exchange) }
+        start()
+    }
+    private val requests = CountDownLatch(expectedRequests)
+    private val release = CountDownLatch(1)
+    val baseUrl: String = "http://127.0.0.1:${server.address.port}"
+
+    fun awaitRequests() {
+        check(requests.await(5, TimeUnit.SECONDS)) { "expected batch requests did not enter" }
+    }
+
+    private fun respond(exchange: HttpExchange) {
+        requests.countDown()
+        try {
+            release.await(5, TimeUnit.SECONDS)
+        } finally {
+            exchange.close()
         }
     }
 
