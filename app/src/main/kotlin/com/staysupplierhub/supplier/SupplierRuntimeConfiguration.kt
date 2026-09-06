@@ -47,6 +47,10 @@ data class SupplierRuntimeProperties(
 @EnableConfigurationProperties(SupplierIntegrationProperties::class)
 class SupplierRuntimeConfiguration {
     @Bean
+    fun configuredSupplierIds(properties: SupplierIntegrationProperties): Set<SupplierId> =
+        properties.configuredSuppliers().keys
+
+    @Bean
     fun supplierCatalogPorts(
         properties: SupplierIntegrationProperties,
         objectMapper: ObjectMapper,
