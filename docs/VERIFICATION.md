@@ -207,17 +207,17 @@ Q-CAT-01 ReadSearchableCatalog
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-SEA-PERIOD-01` | P0 | DOMAIN_UNIT | `checkIn < checkOut` | Valid | PLANNED |
-| `V-SEA-PERIOD-02` | P0 | DOMAIN_UNIT | `checkIn == checkOut` | Reject | PLANNED |
-| `V-SEA-PERIOD-03` | P0 | DOMAIN_UNIT | `checkIn > checkOut` | Reject | PLANNED |
-| `V-SEA-PERIOD-04` | P0 | DOMAIN_UNIT | `09-01 → 09-04` | Required dates `01,02,03`; checkout excluded | PLANNED |
+| `V-SEA-PERIOD-01` | P0 | DOMAIN_UNIT | `checkIn < checkOut` | Valid | PASSING |
+| `V-SEA-PERIOD-02` | P0 | DOMAIN_UNIT | `checkIn == checkOut` | Reject | PASSING |
+| `V-SEA-PERIOD-03` | P0 | DOMAIN_UNIT | `checkIn > checkOut` | Reject | PASSING |
+| `V-SEA-PERIOD-04` | P0 | DOMAIN_UNIT | `09-01 → 09-04` | Required dates `01,02,03`; checkout excluded | PASSING |
 
 ## 8.2 GuestComposition
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-SEA-GUEST-01` | P0 | DOMAIN_UNIT | Valid adults/children | Values preserved separately | PLANNED |
-| `V-SEA-GUEST-02` | P0 | DOMAIN_UNIT | Invalid negative population | Reject according to input/domain policy | PLANNED |
+| `V-SEA-GUEST-01` | P0 | DOMAIN_UNIT | Valid adults/children | Values preserved separately | PASSING |
+| `V-SEA-GUEST-02` | P0 | DOMAIN_UNIT | Invalid negative population | Reject according to input/domain policy | PASSING |
 
 ## 8.3 StayAvailability
 
@@ -1177,6 +1177,16 @@ CAT-006, CON-001, CON-004, CON-006
 → V-INT-A-ERR-01 (400/401/429/500/503)
 → integration/supplier-a/src/test/kotlin/com/staysupplierhub/integration/suppliera/SupplierACatalogAdapterTest.kt
 → controllable local HTTP stub + Kotest
+```
+
+### Search condition domain evidence
+
+```text
+SEA-007, SEA-008, CON-002
+→ V-SEA-PERIOD-01 .. V-SEA-PERIOD-04
+→ V-SEA-GUEST-01 .. V-SEA-GUEST-02
+→ search/domain/src/test/kotlin/com/staysupplierhub/search/domain/SearchConditionTest.kt
+→ Kotlin domain unit tests
 ```
 
 ### Snowflake infrastructure evidence
