@@ -387,10 +387,12 @@ Catalog and availability paths both respect body-level result semantics.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-NORM-01` | P0 | SUPPLIER_INTEGRATION | One valid + one invalid item | Valid sibling preserved; failure recorded | PLANNED |
-| `V-INT-NORM-02` | P0 | SUPPLIER_INTEGRATION | Non-empty payload but no item safely normalizable | Affected batch = `INVALID_RESPONSE` | PLANNED |
-| `V-INT-NORM-03` | P0 | SUPPLIER_INTEGRATION | Legitimate successful empty payload | Successful empty batch | PLANNED |
-| `V-INT-NORM-04` | P0 | SUPPLIER_INTEGRATION | Response/batch envelope malformed | Entire affected batch fails | PLANNED |
+| `V-INT-NORM-01` | P0 | SUPPLIER_INTEGRATION | One valid + one invalid item | Valid sibling preserved; failure recorded | PASSING |
+| `V-INT-NORM-02` | P0 | SUPPLIER_INTEGRATION | Non-empty payload but no item safely normalizable | Affected batch = `INVALID_RESPONSE` | PASSING |
+| `V-INT-NORM-03` | P0 | SUPPLIER_INTEGRATION | Legitimate successful empty payload | Successful empty batch | PASSING |
+| `V-INT-NORM-04` | P0 | SUPPLIER_INTEGRATION | Response/batch envelope malformed | Entire affected batch fails | PASSING |
+
+Evidence: `:integration:supplier-a:test --tests com.staysupplierhub.integration.suppliera.SupplierAAvailabilityNormalizerTest`.
 
 ---
 
