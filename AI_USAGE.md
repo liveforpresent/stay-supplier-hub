@@ -617,3 +617,11 @@ SupplierId 변환에는 `V-WIRE-SUP-06..07`을 새로 배정했다.
 `V-WIRE-SUP-01..03`, `V-WIRE-SUP-07`은 PASSING으로 갱신했으며, 독립 설정값의 실제 adapter 동작
 검증인 `V-WIRE-SUP-06`은 별도 시나리오로 유지한다.
 
+## AI-023 — Supplier별 runtime 설정 격리 검증
+
+**Date:** 2026-09-06
+
+AI가 A/B에 서로 다른 로컬 HTTP stub URL과 API key를 주입한 실제 Spring Composition Root 검증을
+추가했다. 각 Availability Port가 자신의 endpoint와 credential만 사용함을 확인해
+`V-WIRE-SUP-06`을 PASSING으로 갱신했다.
+
