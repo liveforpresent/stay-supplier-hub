@@ -19,6 +19,10 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.util.Collections
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class SupplierBAvailabilityAdapterTest : FunSpec({
     test("availability adapter returns normalized items from a successful response") {
@@ -88,12 +92,62 @@ class SupplierBAvailabilityAdapterTest : FunSpec({
         adapter("http://127.0.0.1:$unavailablePort").search(targets("property-a"), condition()) shouldBe
             failed(SearchSupplierFailureType.CONNECTION_FAILED)
     }
+
+    test("batch requests never exceed configured concurrency and more than one may progress") {
+        ConcurrencyStub(expectedInitialRequests = 2).use { stub ->
+            val worker = Thread {
+                adapter(stub.baseUrl, maxBatchConcurrency = 2)
+                    .search(targets(*(1..121).map { "property-$it" }.toTypedArray()), condition())
+            }.apply { start() }
+
+            stub.awaitInitialRequests()
+            stub.maxObservedConcurrency.get() shouldBe 2
+            stub.releaseRequests()
+            worker.join(5_000)
+            worker.isAlive shouldBe false
+        }
+    }
+
+    test("concurrent searches share one adapter concurrency limit") {
+        ConcurrencyStub(expectedInitialRequests = 2).use { stub ->
+            val availabilityAdapter = adapter(stub.baseUrl, maxBatchConcurrency = 2)
+            val first = Thread {
+                availabilityAdapter.search(targets(*(1..121).map { "first-$it" }.toTypedArray()), condition())
+            }.apply { start() }
+            val second = Thread {
+                availabilityAdapter.search(targets(*(1..121).map { "second-$it" }.toTypedArray()), condition())
+            }.apply { start() }
+
+            stub.awaitInitialRequests()
+            stub.maxObservedConcurrency.get() shouldBe 2
+            stub.releaseRequests()
+            first.join(5_000)
+            second.join(5_000)
+            first.isAlive shouldBe false
+            second.isAlive shouldBe false
+        }
+    }
+
+    test("default batch concurrency is five") {
+        ConcurrencyStub(expectedInitialRequests = 5).use { stub ->
+            val worker = Thread {
+                adapter(stub.baseUrl).search(targets(*(1..251).map { "property-$it" }.toTypedArray()), condition())
+            }.apply { start() }
+
+            stub.awaitInitialRequests()
+            stub.maxObservedConcurrency.get() shouldBe 5
+            stub.releaseRequests()
+            worker.join(5_000)
+            worker.isAlive shouldBe false
+        }
+    }
 })
 
-private fun adapter(baseUrl: String) = SupplierBAvailabilityAdapter(
+private fun adapter(baseUrl: String, maxBatchConcurrency: Int = 5) = SupplierBAvailabilityAdapter(
     webClient = WebClient.builder().baseUrl(baseUrl).build(),
     apiKey = "test-api-key",
     objectMapper = jacksonObjectMapper(),
+    maxBatchConcurrency = maxBatchConcurrency,
 )
 
 private fun targets(vararg codes: String): List<SupplierPropertyTarget> =
@@ -146,6 +200,51 @@ private class AvailabilityAdapterStub(
 
     override fun close() {
         server.stop(0)
+    }
+}
+
+private class ConcurrencyStub(
+    expectedInitialRequests: Int,
+) : AutoCloseable {
+    private val executor = Executors.newCachedThreadPool()
+    private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
+        executor = this@ConcurrencyStub.executor
+        createContext("/b/api/search") { exchange -> respond(exchange) }
+        start()
+    }
+    private val initialRequests = CountDownLatch(expectedInitialRequests)
+    private val release = CountDownLatch(1)
+    private val inFlight = AtomicInteger(0)
+    val maxObservedConcurrency = AtomicInteger(0)
+    val baseUrl: String = "http://127.0.0.1:${server.address.port}"
+
+    fun awaitInitialRequests() {
+        check(initialRequests.await(5, TimeUnit.SECONDS)) { "expected batch requests did not enter" }
+    }
+
+    fun releaseRequests() {
+        release.countDown()
+    }
+
+    private fun respond(exchange: HttpExchange) {
+        val active = inFlight.incrementAndGet()
+        maxObservedConcurrency.updateAndGet { maxOf(it, active) }
+        initialRequests.countDown()
+        try {
+            check(release.await(5, TimeUnit.SECONDS)) { "test did not release batch requests" }
+            val body = successfulResponse.toByteArray()
+            exchange.responseHeaders.add("Content-Type", "application/json")
+            exchange.sendResponseHeaders(200, body.size.toLong())
+            exchange.responseBody.use { it.write(body) }
+        } finally {
+            inFlight.decrementAndGet()
+        }
+    }
+
+    override fun close() {
+        release.countDown()
+        server.stop(0)
+        executor.shutdownNow()
     }
 }
 
