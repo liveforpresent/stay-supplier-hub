@@ -481,9 +481,10 @@ response timeout = 100ms
 |---|---|---|---|---|---|
 | `V-RES-TIMEOUT-01` | P0 | SUPPLIER_INTEGRATION | Connected upstream never responds | `TIMEOUT` | PASSING |
 | `V-RES-CONN-01` | P0 | SUPPLIER_INTEGRATION | Connection refused/unreachable | `CONNECTION_FAILED` | PASSING |
-| `V-RES-TIMEOUT-02` | P0 | APPLICATION_UNIT | One Supplier timeout + one succeeds | Successful Supplier result preserved | PLANNED |
+| `V-RES-TIMEOUT-02` | P0 | APPLICATION_UNIT | One Supplier timeout + one succeeds | Successful Supplier result preserved | PASSING |
 
 Evidence: `:integration:supplier-a:test --tests com.staysupplierhub.integration.suppliera.SupplierAAvailabilityAdapterTest`.
+`V-RES-TIMEOUT-02` evidence: `:search:application:test --tests com.staysupplierhub.search.application.SearchStaysServiceTest`.
 
 ---
 
