@@ -552,11 +552,14 @@ These scenarios verify the operational gate without adding a Search domain state
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-CAT-BOOT-01` | P0 | CROSS_MODULE | Fresh DB; every configured Supplier startup sync succeeds | Every baseline available; Search gate OPEN | PLANNED |
-| `V-CAT-BOOT-02` | P0 | CROSS_MODULE | Fresh DB; A sync fails, B succeeds; A has no previous state | Search gate CLOSED; normal Search not executed | PLANNED |
-| `V-CAT-BOOT-03` | P0 | CROSS_MODULE | Existing A/B state; A startup sync fails, B succeeds | A stale baseline preserved; Search gate OPEN | PLANNED |
-| `V-CAT-BOOT-04` | P0 | CROSS_MODULE | Valid startup sync establishes Catalog with zero searchable Properties | Baseline available; Search gate OPEN | PLANNED |
-| `V-CAT-BOOT-05` | P0 | CROSS_MODULE | Gate CLOSED and Search endpoint called directly | `503 SEARCH_UNAVAILABLE`; missing targets are not treated as empty result | PLANNED |
+| `V-CAT-BOOT-01` | P0 | CROSS_MODULE | Fresh DB; every configured Supplier startup sync succeeds | Every baseline available; Search gate OPEN | PASSING |
+| `V-CAT-BOOT-02` | P0 | CROSS_MODULE | Fresh DB; A sync fails, B succeeds; A has no previous state | Search gate CLOSED; normal Search not executed | PASSING |
+| `V-CAT-BOOT-03` | P0 | CROSS_MODULE | Existing A/B state; A startup sync fails, B succeeds | A stale baseline preserved; Search gate OPEN | PASSING |
+| `V-CAT-BOOT-04` | P0 | CROSS_MODULE | Valid startup sync establishes Catalog with zero searchable Properties | Baseline available; Search gate OPEN | PASSING |
+| `V-CAT-BOOT-05` | P0 | CROSS_MODULE | Gate CLOSED and Search endpoint called directly | `503 SEARCH_UNAVAILABLE`; missing targets are not treated as empty result | PASSING |
+
+`V-CAT-BOOT-01..04` evidence: `:app:test --tests com.staysupplierhub.CatalogTransactionBoundaryTest`.
+`V-CAT-BOOT-05` evidence: `:app:test --tests com.staysupplierhub.catalog.CatalogBootstrapConfigurationTest`.
 
 ---
 
@@ -623,7 +626,7 @@ The real DB/Supplier clients are not required.
 | `V-API-ERR-02` | P0 | WEB_CONTRACT | Unexpected exception | `500 INTERNAL_ERROR` | PLANNED |
 | `V-API-ERR-03` | P0 | WEB_CONTRACT | 503 result | `Cache-Control: no-store` | PLANNED |
 | `V-API-ERR-04` | P0 | WEB_CONTRACT | Supplier auth/rate-limit internal failure | No public 401/429 passthrough | PLANNED |
-| `V-API-ERR-05` | P0 | WEB_CONTRACT | Catalog bootstrap gate CLOSED | `503 SEARCH_UNAVAILABLE`; unavailable-baseline Supplier IDs exposed, no raw cause | PLANNED |
+| `V-API-ERR-05` | P0 | WEB_CONTRACT | Catalog bootstrap gate CLOSED | `503 SEARCH_UNAVAILABLE`; unavailable-baseline Supplier IDs exposed, no raw cause | PASSING |
 
 ---
 

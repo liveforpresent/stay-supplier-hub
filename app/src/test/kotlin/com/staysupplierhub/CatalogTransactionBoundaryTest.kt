@@ -5,6 +5,8 @@ import com.staysupplierhub.catalog.adapter.persistence.PropertyJpaEntity
 import com.staysupplierhub.catalog.adapter.persistence.SpringDataPropertyRepository
 import com.staysupplierhub.catalog.application.ApplyCatalogSnapshotService
 import com.staysupplierhub.catalog.application.SynchronizeSupplierCatalogService
+import com.staysupplierhub.catalog.CatalogBootstrapConfiguration
+import com.staysupplierhub.catalog.CatalogReadiness
 import com.staysupplierhub.catalog.api.PropertyId
 import com.staysupplierhub.catalog.api.RoomTypeId
 import com.staysupplierhub.catalog.api.SupplierId
@@ -14,6 +16,9 @@ import com.staysupplierhub.catalog.port.out.persistence.PropertyRepository
 import com.staysupplierhub.catalog.port.out.persistence.RoomTypeIdGenerator
 import com.staysupplierhub.catalog.port.out.supplier.SupplierCatalogOutcome
 import com.staysupplierhub.catalog.port.out.supplier.SupplierCatalogPort
+import com.staysupplierhub.catalog.port.`in`.CatalogSynchronizationResult
+import com.staysupplierhub.catalog.port.out.supplier.CatalogSupplierFailure
+import com.staysupplierhub.catalog.port.out.supplier.CatalogSupplierFailureType
 import com.staysupplierhub.catalog.port.out.supplier.SupplierCatalogProperty
 import com.staysupplierhub.catalog.port.out.supplier.SupplierCatalogRoomType
 import com.staysupplierhub.catalog.port.out.supplier.SupplierCatalogSnapshot
@@ -33,6 +38,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.transaction.support.TransactionSynchronizationManager
+import org.springframework.boot.DefaultApplicationArguments
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -95,6 +101,66 @@ class CatalogTransactionBoundaryTest @Autowired constructor(
 
         assertEquals(1, catalogPersistenceAdapter.findAllBySupplier(supplierA).size)
         assertEquals(emptyList(), catalogPersistenceAdapter.findAllBySupplier(supplierB))
+    }
+
+    @Test
+    fun `failed startup sync retains an actual persisted supplier baseline`() {
+        suppliers.outcomes[supplierA] = success("a-1", "a-room-1")
+        synchronizeSupplierCatalogService.synchronize(supplierA)
+        suppliers.outcomes[supplierA] = SupplierCatalogOutcome.Failed(
+            CatalogSupplierFailure(CatalogSupplierFailureType.SERVICE_UNAVAILABLE),
+        )
+        val readiness = CatalogReadiness()
+
+        CatalogBootstrapConfiguration().catalogBootstrapRunner(
+            setOf(supplierA), synchronizeSupplierCatalogService, catalogPersistenceAdapter, readiness,
+        ).run(DefaultApplicationArguments())
+
+        assertEquals(true, readiness.isReady())
+    }
+
+    @Test
+    fun `failed startup sync without persisted state closes readiness`() {
+        suppliers.outcomes[supplierA] = SupplierCatalogOutcome.Failed(
+            CatalogSupplierFailure(CatalogSupplierFailureType.SERVICE_UNAVAILABLE),
+        )
+        val readiness = CatalogReadiness()
+
+        CatalogBootstrapConfiguration().catalogBootstrapRunner(
+            setOf(supplierA), synchronizeSupplierCatalogService, catalogPersistenceAdapter, readiness,
+        ).run(DefaultApplicationArguments())
+
+        assertEquals(false, readiness.isReady())
+        assertEquals(setOf(supplierA), readiness.unavailableSupplierIds())
+    }
+
+    @Test
+    fun `successful startup sync for every configured supplier opens readiness`() {
+        suppliers.outcomes[supplierA] = success("a-1", "a-room-1")
+        suppliers.outcomes[supplierB] = success("b-1", "b-room-1")
+        val readiness = CatalogReadiness()
+
+        CatalogBootstrapConfiguration().catalogBootstrapRunner(
+            setOf(supplierA, supplierB), synchronizeSupplierCatalogService, catalogPersistenceAdapter, readiness,
+        ).run(DefaultApplicationArguments())
+
+        assertEquals(true, readiness.isReady())
+        assertEquals(emptySet(), readiness.unavailableSupplierIds())
+        assertEquals(1, catalogPersistenceAdapter.findAllBySupplier(supplierA).size)
+        assertEquals(1, catalogPersistenceAdapter.findAllBySupplier(supplierB).size)
+    }
+
+    @Test
+    fun `successful empty startup snapshot establishes readiness`() {
+        suppliers.outcomes[supplierA] = SupplierCatalogOutcome.Success(SupplierCatalogSnapshot(emptyList()))
+        val readiness = CatalogReadiness()
+
+        CatalogBootstrapConfiguration().catalogBootstrapRunner(
+            setOf(supplierA), synchronizeSupplierCatalogService, catalogPersistenceAdapter, readiness,
+        ).run(DefaultApplicationArguments())
+
+        assertEquals(true, readiness.isReady())
+        assertEquals(emptyList(), catalogPersistenceAdapter.findAllBySupplier(supplierA))
     }
 
     private fun success(propertyCode: String, roomCode: String) = SupplierCatalogOutcome.Success(

@@ -4,10 +4,13 @@ import com.staysupplierhub.catalog.api.PropertyId
 import com.staysupplierhub.catalog.api.RoomTypeId
 import com.staysupplierhub.catalog.application.ApplyCatalogSnapshotService
 import com.staysupplierhub.catalog.application.ReadSearchableCatalogService
+import com.staysupplierhub.catalog.application.SynchronizeSupplierCatalogService
 import com.staysupplierhub.catalog.port.out.persistence.PropertyIdGenerator
 import com.staysupplierhub.catalog.port.out.persistence.PropertyRepository
 import com.staysupplierhub.catalog.port.out.persistence.RoomTypeIdGenerator
 import com.staysupplierhub.catalog.port.out.persistence.SearchableCatalogReader
+import com.staysupplierhub.catalog.port.out.supplier.SupplierCatalogPort
+import com.staysupplierhub.catalog.api.SupplierId
 import com.staysupplierhub.shared.infrastructure.id.SnowflakeIdGenerator
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -44,4 +47,11 @@ class CatalogRuntimeConfiguration {
     @Bean
     fun readSearchableCatalogService(searchableCatalogReader: SearchableCatalogReader) =
         ReadSearchableCatalogService(searchableCatalogReader)
+
+    @Bean
+    fun synchronizeSupplierCatalogService(
+        supplierCatalogPorts: Map<SupplierId, SupplierCatalogPort>,
+        applyCatalogSnapshotService: ApplyCatalogSnapshotService,
+    ) = SynchronizeSupplierCatalogService(supplierCatalogPorts, applyCatalogSnapshotService)
+
 }
