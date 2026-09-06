@@ -357,12 +357,12 @@ Status: PASSING
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-B-PROTO-01` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `0000` | Success | PLANNED |
-| `V-INT-B-PROTO-02` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E400` | `INVALID_REQUEST` | PLANNED |
-| `V-INT-B-PROTO-03` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E401` | `AUTHENTICATION_FAILED` | PLANNED |
-| `V-INT-B-PROTO-04` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E429` | `RATE_LIMITED` | PLANNED |
-| `V-INT-B-PROTO-05` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E500` | `SUPPLIER_ERROR` | PLANNED |
-| `V-INT-B-PROTO-06` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E503` | `SERVICE_UNAVAILABLE` | PLANNED |
+| `V-INT-B-PROTO-01` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `0000` | Success | PASSING |
+| `V-INT-B-PROTO-02` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E400` | `INVALID_REQUEST` | PASSING |
+| `V-INT-B-PROTO-03` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E401` | `AUTHENTICATION_FAILED` | PASSING |
+| `V-INT-B-PROTO-04` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E429` | `RATE_LIMITED` | PASSING |
+| `V-INT-B-PROTO-05` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E500` | `SUPPLIER_ERROR` | PASSING |
+| `V-INT-B-PROTO-06` | P0 | SUPPLIER_INTEGRATION | HTTP 200 + `E503` | `SERVICE_UNAVAILABLE` | PASSING |
 
 Catalog and availability paths both respect body-level result semantics.
 
@@ -370,8 +370,8 @@ Catalog and availability paths both respect body-level result semantics.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-B-PRICE-01` | P0 | SUPPLIER_INTEGRATION | Valid `totalPrice` | Whole-stay amount preserved unchanged | PLANNED |
-| `V-INT-B-PRICE-02` | P0 | SUPPLIER_INTEGRATION | Valid B price | No fabricated nightly/tax fields enter neutral contract | PLANNED |
+| `V-INT-B-PRICE-01` | P0 | SUPPLIER_INTEGRATION | Valid `totalPrice` | Whole-stay amount preserved unchanged | PASSING |
+| `V-INT-B-PRICE-02` | P0 | SUPPLIER_INTEGRATION | Valid B price | No fabricated nightly/tax fields enter neutral contract | PASSING |
 
 ---
 
@@ -1251,6 +1251,16 @@ CON-002
 → V-INT-B-REQ-01 .. V-INT-B-REQ-03
 → integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityClientTest.kt
 → controllable local HTTP stub + Kotest
+```
+
+### Supplier B availability normalization evidence
+
+```text
+CON-004, SEA-003
+→ V-INT-B-PROTO-01 .. V-INT-B-PROTO-06
+→ V-INT-B-PRICE-01 .. V-INT-B-PRICE-02
+→ integration/supplier-b/src/test/kotlin/com/staysupplierhub/integration/supplierb/SupplierBAvailabilityNormalizerTest.kt
+→ Supplier B envelope/resultCode and price normalization tests
 ```
 
 ### Snowflake infrastructure evidence

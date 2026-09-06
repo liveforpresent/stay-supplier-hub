@@ -553,3 +553,12 @@ It preserves the supplied stay period and guest composition, sends comma-separat
 50-target request limit, and keeps Supplier-specific HTTP details inside the adapter. A local HTTP stub verified
 the API key and request translation; all four focused tests passed.
 
+## AI-017 — Supplier B protocol and price normalization
+
+**Date:** 2026-09-06
+
+AI-assisted implementation added a Supplier B response normalizer that treats HTTP 200 as transport success only
+and interprets the body-level `resultCode` before data enters Search. Known Supplier codes map to the
+Search-owned failure taxonomy; successful data preserves the whole-stay `totalPrice` and requires
+`taxIncluded=true` without fabricating a nightly or tax breakdown. Eight focused normalization tests passed.
+
