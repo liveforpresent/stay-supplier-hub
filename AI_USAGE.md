@@ -613,3 +613,7 @@ SupplierId 변환에는 `V-WIRE-SUP-06..07`을 새로 배정했다.
 남기지 않은 채 종료되어 아직 실행 증거를 얻지 못했다. 따라서 관련 `V-WIRE-SUP-*` 상태는 PLANNED로
 유지한다.
 
+후속으로 persistent Gradle daemon을 사용해 runtime wiring focused test를 통과시켰다.
+`V-WIRE-SUP-01..03`, `V-WIRE-SUP-07`은 PASSING으로 갱신했으며, 독립 설정값의 실제 adapter 동작
+검증인 `V-WIRE-SUP-06`은 별도 시나리오로 유지한다.
+

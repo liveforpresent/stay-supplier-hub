@@ -928,3 +928,13 @@ Supplier B Catalog의 complete snapshot 및 fail-closed 규칙은 canonical inte
 `V-INT-B-CAT-01..03`으로 명시했다. 이 변경은 계약 의미를 추가하지 않고, Supplier B Catalog Adapter의
 구현·테스트·요구사항을 추적 가능하게 만든다.
 
+## Day 7 — Composition Root의 직접 의존성 명시
+
+**Type:** Architecture alignment
+
+`:app`이 Supplier Availability Port map과 `ObjectMapper`를 직접 조립하는 runtime wiring을 추가하면서,
+Supplier 모듈의 implementation 의존성이 App compile classpath에 노출될 것이라는 가정이 드러났다.
+Composition Root가 사용하는 `:search:port`와 Jackson Kotlin 모듈을 `:app`에 직접 선언하고, Gradle
+모듈 경계 허용 목록도 실제 책임과 일치시켰다. 이로써 outer composition이 concrete adapter 생성에
+필요한 계약/기술 의존성을 명시적으로 소유한다.
+
