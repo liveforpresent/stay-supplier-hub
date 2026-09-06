@@ -7,6 +7,7 @@ import com.staysupplierhub.search.port.out.supplier.SearchSupplierFailureType
 import com.staysupplierhub.search.port.out.supplier.SupplierAvailabilityOutcome
 import com.staysupplierhub.search.port.out.supplier.SupplierAvailabilityPort
 import com.staysupplierhub.search.port.out.supplier.SupplierPropertyTarget
+import io.netty.handler.timeout.ReadTimeoutException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -60,7 +61,7 @@ class SupplierAAvailabilityAdapter(
             failure(exception.statusCode.value().toFailureType())
         } catch (exception: WebClientRequestException) {
             failure(
-                if (exception.cause is TimeoutException) {
+                if (exception.hasTimeoutCause()) {
                     SearchSupplierFailureType.TIMEOUT
                 } else {
                     SearchSupplierFailureType.CONNECTION_FAILED
@@ -74,6 +75,9 @@ class SupplierAAvailabilityAdapter(
         is SupplierAvailabilityOutcome.Completed -> failures
         is SupplierAvailabilityOutcome.Failed -> failures
     }
+
+    private fun Throwable.hasTimeoutCause(): Boolean = generateSequence(this) { it.cause }
+        .any { it is TimeoutException || it is ReadTimeoutException }
 
     private fun Int.toFailureType(): SearchSupplierFailureType = when (this) {
         400 -> SearchSupplierFailureType.INVALID_REQUEST

@@ -938,3 +938,14 @@ Composition Root가 사용하는 `:search:port`와 Jackson Kotlin 모듈을 `:ap
 모듈 경계 허용 목록도 실제 책임과 일치시켰다. 이로써 outer composition이 concrete adapter 생성에
 필요한 계약/기술 의존성을 명시적으로 소유한다.
 
+## Day 7 — Netty timeout 예외의 명시적 정규화
+
+**Type:** Defect / resilience verification
+
+연결은 성공했지만 응답하지 않는 upstream을 100ms response timeout으로 호출한 결과, Netty는
+`ReadTimeoutException`을 반환했다. 기존 Adapter는 Java `TimeoutException`만 검사해 이를
+`CONNECTION_FAILED`로 분류했다.
+
+timeout 원인 체인을 검사해 Java와 Netty timeout 예외를 모두 `TIMEOUT`으로 정규화했다. 실제
+connected-but-stalled HTTP stub으로 수정 전 실패와 수정 후 통과를 확인했다.
+

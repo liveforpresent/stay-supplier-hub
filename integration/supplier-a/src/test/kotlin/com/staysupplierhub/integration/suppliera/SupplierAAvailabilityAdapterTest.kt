@@ -12,11 +12,14 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
 import java.net.InetSocketAddress
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.Duration
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -140,6 +143,17 @@ class SupplierAAvailabilityAdapterTest : FunSpec({
             worker.isAlive shouldBe false
         }
     }
+
+    test("a connected upstream that does not respond becomes a timeout") {
+        NoResponseStub().use { stub ->
+            val outcome = timeoutAdapter(stub.baseUrl).search(adapterTargets("hotel-a"), adapterCondition())
+
+            outcome shouldBe SupplierAvailabilityOutcome.Failed(
+                listOf(com.staysupplierhub.search.port.out.supplier.SearchSupplierFailure(SearchSupplierFailureType.TIMEOUT)),
+            )
+            stub.awaitRequest()
+        }
+    }
 })
 
 private fun adapter(baseUrl: String, maxBatchConcurrency: Int = 5) = SupplierAAvailabilityAdapter(
@@ -147,6 +161,15 @@ private fun adapter(baseUrl: String, maxBatchConcurrency: Int = 5) = SupplierAAv
     apiKey = "test-api-key",
     objectMapper = jacksonObjectMapper(),
     maxBatchConcurrency = maxBatchConcurrency,
+)
+
+private fun timeoutAdapter(baseUrl: String) = SupplierAAvailabilityAdapter(
+    webClient = WebClient.builder()
+        .baseUrl(baseUrl)
+        .clientConnector(ReactorClientHttpConnector(HttpClient.create().responseTimeout(Duration.ofMillis(100))))
+        .build(),
+    apiKey = "test-api-key",
+    objectMapper = jacksonObjectMapper(),
 )
 
 private fun adapterTargets(vararg codes: String): List<SupplierPropertyTarget> =
@@ -234,6 +257,37 @@ private class ConcurrencyStub(
             exchange.responseBody.use { it.write(body) }
         } finally {
             inFlight.decrementAndGet()
+        }
+    }
+
+    override fun close() {
+        release.countDown()
+        server.stop(0)
+        executor.shutdownNow()
+    }
+}
+
+private class NoResponseStub : AutoCloseable {
+    private val executor = Executors.newCachedThreadPool()
+    private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
+        executor = this@NoResponseStub.executor
+        createContext("/a/v1/availability") { exchange -> awaitRelease(exchange) }
+        start()
+    }
+    private val requestEntered = CountDownLatch(1)
+    private val release = CountDownLatch(1)
+    val baseUrl = "http://127.0.0.1:${server.address.port}"
+
+    fun awaitRequest() {
+        check(requestEntered.await(5, TimeUnit.SECONDS)) { "expected request did not enter" }
+    }
+
+    private fun awaitRelease(exchange: HttpExchange) {
+        requestEntered.countDown()
+        try {
+            release.await(5, TimeUnit.SECONDS)
+        } finally {
+            exchange.close()
         }
     }
 
