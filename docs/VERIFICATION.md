@@ -312,10 +312,10 @@ Use an in-process controllable HTTP stub for focused adapter tests.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-A-PRICE-01` | P0 | SUPPLIER_INTEGRATION | Complete daily rate rows | `Σ(nightlyRate + taxAmount)` whole-stay price | PLANNED |
-| `V-INT-A-PRICE-02` | P0 | SUPPLIER_INTEGRATION | Required price date missing | `INVALID_RESPONSE` | PLANNED |
-| `V-INT-A-PRICE-03` | P0 | SUPPLIER_INTEGRATION | Duplicate price date | `INVALID_RESPONSE` | PLANNED |
-| `V-INT-A-PRICE-04` | P0 | SUPPLIER_INTEGRATION | Out-of-period price row | `INVALID_RESPONSE` | PLANNED |
+| `V-INT-A-PRICE-01` | P0 | SUPPLIER_INTEGRATION | Complete daily rate rows | `Σ(nightlyRate + taxAmount)` whole-stay price | PASSING |
+| `V-INT-A-PRICE-02` | P0 | SUPPLIER_INTEGRATION | Required price date missing | `INVALID_RESPONSE` | PASSING |
+| `V-INT-A-PRICE-03` | P0 | SUPPLIER_INTEGRATION | Duplicate price date | `INVALID_RESPONSE` | PASSING |
+| `V-INT-A-PRICE-04` | P0 | SUPPLIER_INTEGRATION | Out-of-period price row | `INVALID_RESPONSE` | PASSING |
 
 ## HTTP failure normalization
 
@@ -1186,6 +1186,15 @@ CON-001, CON-002, CON-004
 → V-INT-A-REQ-01 .. V-INT-A-REQ-03
 → integration/supplier-a/src/test/kotlin/com/staysupplierhub/integration/suppliera/SupplierAAvailabilityClientTest.kt
 → controllable local HTTP stub + Kotest
+```
+
+### Supplier A Availability normalization evidence
+
+```text
+CON-004, SEA-003, SEA-004
+→ V-INT-A-PRICE-01 .. V-INT-A-PRICE-04
+→ integration/supplier-a/src/test/kotlin/com/staysupplierhub/integration/suppliera/SupplierAAvailabilityNormalizerTest.kt
+→ Supplier A wire DTO normalization + Kotest
 ```
 
 ### Search condition domain evidence
