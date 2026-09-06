@@ -223,12 +223,12 @@ Q-CAT-01 ReadSearchableCatalog
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-SEA-AVAIL-01` | P0 | DOMAIN_UNIT | Inventory `[3,1,5]` | `availableRooms=1` | PLANNED |
-| `V-SEA-AVAIL-02` | P0 | DOMAIN_UNIT | Inventory `[3,0,5]` | `availableRooms=0` | PLANNED |
-| `V-SEA-AVAIL-03` | P0 | DOMAIN_UNIT | Required date missing | Invalid | PLANNED |
-| `V-SEA-AVAIL-04` | P0 | DOMAIN_UNIT | Duplicate date | Invalid | PLANNED |
-| `V-SEA-AVAIL-05` | P0 | DOMAIN_UNIT | Out-of-period date | Invalid | PLANNED |
-| `V-SEA-AVAIL-06` | P0 | DOMAIN_UNIT | Negative inventory | Invalid | PLANNED |
+| `V-SEA-AVAIL-01` | P0 | DOMAIN_UNIT | Inventory `[3,1,5]` | `availableRooms=1` | PASSING |
+| `V-SEA-AVAIL-02` | P0 | DOMAIN_UNIT | Inventory `[3,0,5]` | `availableRooms=0` | PASSING |
+| `V-SEA-AVAIL-03` | P0 | DOMAIN_UNIT | Required date missing | Invalid | PASSING |
+| `V-SEA-AVAIL-04` | P0 | DOMAIN_UNIT | Duplicate date | Invalid | PASSING |
+| `V-SEA-AVAIL-05` | P0 | DOMAIN_UNIT | Out-of-period date | Invalid | PASSING |
+| `V-SEA-AVAIL-06` | P0 | DOMAIN_UNIT | Negative inventory | Invalid | PASSING |
 
 ## 8.4 Money / StayPrice
 
@@ -1186,6 +1186,15 @@ SEA-007, SEA-008, CON-002
 → V-SEA-PERIOD-01 .. V-SEA-PERIOD-04
 → V-SEA-GUEST-01 .. V-SEA-GUEST-02
 → search/domain/src/test/kotlin/com/staysupplierhub/search/domain/SearchConditionTest.kt
+→ Kotlin domain unit tests
+```
+
+### Search availability domain evidence
+
+```text
+SEA-013, SEA-014, SEA-015
+→ V-SEA-AVAIL-01 .. V-SEA-AVAIL-06
+→ search/domain/src/test/kotlin/com/staysupplierhub/search/domain/StayAvailabilityTest.kt
 → Kotlin domain unit tests
 ```
 
