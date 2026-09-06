@@ -234,8 +234,8 @@ Q-CAT-01 ReadSearchableCatalog
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-SEA-PRICE-01` | P0 | DOMAIN_UNIT | Amount + currency constructed | Both preserved | PLANNED |
-| `V-SEA-PRICE-02` | P0 | DOMAIN_UNIT | Different currencies | No implicit FX conversion | PLANNED |
+| `V-SEA-PRICE-01` | P0 | DOMAIN_UNIT | Amount + currency constructed | Both preserved | PASSING |
+| `V-SEA-PRICE-02` | P0 | DOMAIN_UNIT | Different currencies | No implicit FX conversion | PASSING |
 
 ---
 
@@ -1195,6 +1195,15 @@ SEA-007, SEA-008, CON-002
 SEA-013, SEA-014, SEA-015
 → V-SEA-AVAIL-01 .. V-SEA-AVAIL-06
 → search/domain/src/test/kotlin/com/staysupplierhub/search/domain/StayAvailabilityTest.kt
+→ Kotlin domain unit tests
+```
+
+### Search price domain evidence
+
+```text
+SEA-003, SEA-004
+→ V-SEA-PRICE-01 .. V-SEA-PRICE-02
+→ search/domain/src/test/kotlin/com/staysupplierhub/search/domain/StayPriceTest.kt
 → Kotlin domain unit tests
 ```
 
