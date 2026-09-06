@@ -1197,6 +1197,15 @@ CON-004, SEA-003, SEA-004
 → Supplier A wire DTO normalization + Kotest
 ```
 
+### Supplier A Availability adapter evidence
+
+```text
+CON-004, CON-006
+→ V-INT-A-ERR-01
+→ integration/supplier-a/src/test/kotlin/com/staysupplierhub/integration/suppliera/SupplierAAvailabilityAdapterTest.kt
+→ controllable local HTTP stub + Kotest
+```
+
 ### Search condition domain evidence
 
 ```text
