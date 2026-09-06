@@ -297,9 +297,9 @@ Use an in-process controllable HTTP stub for focused adapter tests.
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-INT-A-REQ-01` | P0 | SUPPLIER_INTEGRATION | Availability request | `X-Api-Key` included | PLANNED |
-| `V-INT-A-REQ-02` | P0 | SUPPLIER_INTEGRATION | Dates/guests supplied | Values preserved | PLANNED |
-| `V-INT-A-REQ-03` | P0 | SUPPLIER_INTEGRATION | External targets supplied | Correct Supplier Property codes transmitted | PLANNED |
+| `V-INT-A-REQ-01` | P0 | SUPPLIER_INTEGRATION | Availability request | `X-Api-Key` included | PASSING |
+| `V-INT-A-REQ-02` | P0 | SUPPLIER_INTEGRATION | Dates/guests supplied | Values preserved | PASSING |
+| `V-INT-A-REQ-03` | P0 | SUPPLIER_INTEGRATION | External targets supplied | Correct Supplier Property codes transmitted | PASSING |
 
 ## Catalog
 
@@ -1176,6 +1176,15 @@ CAT-006, CON-001, CON-004, CON-006
 → V-INT-A-CAT-01 .. V-INT-A-CAT-02
 → V-INT-A-ERR-01 (400/401/429/500/503)
 → integration/supplier-a/src/test/kotlin/com/staysupplierhub/integration/suppliera/SupplierACatalogAdapterTest.kt
+→ controllable local HTTP stub + Kotest
+```
+
+### Supplier A Availability request evidence
+
+```text
+CON-001, CON-002, CON-004
+→ V-INT-A-REQ-01 .. V-INT-A-REQ-03
+→ integration/supplier-a/src/test/kotlin/com/staysupplierhub/integration/suppliera/SupplierAAvailabilityClientTest.kt
 → controllable local HTTP stub + Kotest
 ```
 
