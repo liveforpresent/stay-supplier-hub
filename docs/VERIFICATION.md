@@ -595,36 +595,42 @@ They do not retest Snowflake bit arithmetic.
 Use Spring MVC slice tests or equivalent.
 The real DB/Supplier clients are not required.
 
+Evidence for the PASSING rows in this section:
+
+```text
+:search:adapter:web:test --tests com.staysupplierhub.search.web.SearchControllerTest
+```
+
 ## Input
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-API-REQ-01` | P0 | WEB_CONTRACT | Required parameter missing | `400 INVALID_SEARCH_CONDITION` | PLANNED |
-| `V-API-REQ-02` | P0 | WEB_CONTRACT | Invalid date format | canonical 400 | PLANNED |
-| `V-API-REQ-03` | P0 | WEB_CONTRACT | `checkIn >= checkOut` | canonical 400 | PLANNED |
-| `V-API-REQ-04` | P0 | WEB_CONTRACT | `adults < 1` | canonical 400 | PLANNED |
-| `V-API-REQ-05` | P0 | WEB_CONTRACT | `children < 0` | canonical 400 | PLANNED |
+| `V-API-REQ-01` | P0 | WEB_CONTRACT | Required parameter missing | `400 INVALID_SEARCH_CONDITION` | PASSING |
+| `V-API-REQ-02` | P0 | WEB_CONTRACT | Invalid date format | canonical 400 | PASSING |
+| `V-API-REQ-03` | P0 | WEB_CONTRACT | `checkIn >= checkOut` | canonical 400 | PASSING |
+| `V-API-REQ-04` | P0 | WEB_CONTRACT | `adults < 1` | canonical 400 | PASSING |
+| `V-API-REQ-05` | P0 | WEB_CONTRACT | `children < 0` | canonical 400 | PASSING |
 
 ## Success mapping
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-API-RES-01` | P0 | WEB_CONTRACT | `Result` without failures | `200`, `COMPLETE` | PLANNED |
-| `V-API-RES-02` | P0 | WEB_CONTRACT | `Result` with failures | `200`, `PARTIAL` | PLANNED |
-| `V-API-RES-03` | P0 | WEB_CONTRACT | Complete empty result | `200`, empty offers | PLANNED |
-| `V-API-RES-04` | P0 | WEB_CONTRACT | Partial empty result | `200`, degraded Supplier | PLANNED |
-| `V-API-RES-05` | P0 | WEB_CONTRACT | StayOffer inventory is zero | `availableRooms=0` preserved | PLANNED |
-| `V-API-RES-06` | P0 | WEB_CONTRACT | Snowflake IDs returned | JSON strings | PLANNED |
-| `V-API-RES-07` | P0 | WEB_CONTRACT | Multiple failures for same Supplier | Supplier appears once in `degradedSuppliers` | PLANNED |
+| `V-API-RES-01` | P0 | WEB_CONTRACT | `Result` without failures | `200`, `COMPLETE` | PASSING |
+| `V-API-RES-02` | P0 | WEB_CONTRACT | `Result` with failures | `200`, `PARTIAL` | PASSING |
+| `V-API-RES-03` | P0 | WEB_CONTRACT | Complete empty result | `200`, empty offers | PASSING |
+| `V-API-RES-04` | P0 | WEB_CONTRACT | Partial empty result | `200`, degraded Supplier | PASSING |
+| `V-API-RES-05` | P0 | WEB_CONTRACT | StayOffer inventory is zero | `availableRooms=0` preserved | PASSING |
+| `V-API-RES-06` | P0 | WEB_CONTRACT | Snowflake IDs returned | JSON strings | PASSING |
+| `V-API-RES-07` | P0 | WEB_CONTRACT | Multiple failures for same Supplier | Supplier appears once in `degradedSuppliers` | PASSING |
 | `V-API-RES-08` | P0 | WEB_CONTRACT | Search success | `Cache-Control: no-store` | PLANNED |
 
 ## Failure mapping
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-API-ERR-01` | P0 | WEB_CONTRACT | `SearchOutcome.Unavailable` | `503 SEARCH_UNAVAILABLE` | PLANNED |
-| `V-API-ERR-02` | P0 | WEB_CONTRACT | Unexpected exception | `500 INTERNAL_ERROR` | PLANNED |
-| `V-API-ERR-03` | P0 | WEB_CONTRACT | 503 result | `Cache-Control: no-store` | PLANNED |
+| `V-API-ERR-01` | P0 | WEB_CONTRACT | `SearchOutcome.Unavailable` | `503 SEARCH_UNAVAILABLE` | PASSING |
+| `V-API-ERR-02` | P0 | WEB_CONTRACT | Unexpected exception | `500 INTERNAL_ERROR` | PASSING |
+| `V-API-ERR-03` | P0 | WEB_CONTRACT | 503 result | `Cache-Control: no-store` | PASSING |
 | `V-API-ERR-04` | P0 | WEB_CONTRACT | Supplier auth/rate-limit internal failure | No public 401/429 passthrough | PLANNED |
 | `V-API-ERR-05` | P0 | WEB_CONTRACT | Catalog bootstrap gate CLOSED | `503 SEARCH_UNAVAILABLE`; unavailable-baseline Supplier IDs exposed, no raw cause | PASSING |
 
