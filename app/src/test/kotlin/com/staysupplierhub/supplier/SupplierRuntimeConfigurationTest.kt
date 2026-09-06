@@ -22,7 +22,7 @@ class SupplierRuntimeConfigurationTest : FunSpec({
             val catalogPortIds = catalogPorts(context).keys
             val availabilityPortIds = availabilityPorts(context).keys
 
-            configuredSupplierIds shouldContainExactlyInAnyOrder SupplierId("A"), SupplierId("B")
+            configuredSupplierIds.shouldContainExactlyInAnyOrder(SupplierId("A"), SupplierId("B"))
             catalogPortIds shouldBe configuredSupplierIds
             availabilityPortIds shouldBe configuredSupplierIds
         }

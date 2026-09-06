@@ -66,6 +66,7 @@ val allowedProjectDependencies = mapOf(
         ":catalog:port",
         ":catalog:application",
         ":catalog:adapter:persistence",
+        ":search:port",
         ":search:application",
         ":search:adapter:web",
         ":integration:supplier-a",

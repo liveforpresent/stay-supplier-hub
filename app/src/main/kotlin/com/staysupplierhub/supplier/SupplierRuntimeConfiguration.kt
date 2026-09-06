@@ -64,7 +64,7 @@ class SupplierRuntimeConfiguration {
         objectMapper: ObjectMapper,
     ): Map<SupplierId, SupplierAvailabilityPort> = properties.configuredSuppliers().mapValues { (supplierId, runtime) ->
         when (supplierId.value) {
-            "A" -> SupplierAAvailabilityAdapter(webClient(runtime), runtime.apiKey, objectMapper)
+            "A" -> SupplierAAvailabilityAdapter(webClient(runtime), runtime.apiKey, objectMapper, runtime.batchConcurrency)
             "B" -> SupplierBAvailabilityAdapter(webClient(runtime), runtime.apiKey, objectMapper, runtime.batchConcurrency)
             else -> error("No Availability adapter is registered for configured Supplier ${supplierId.value}")
         }
