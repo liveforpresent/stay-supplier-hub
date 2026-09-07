@@ -45,6 +45,12 @@ val stopE2eMockSupplier = tasks.register("stopE2eMockSupplier") {
     }
 }
 
+tasks.test {
+    filter {
+        excludeTestsMatching("com.staysupplierhub.*EndToEndTest")
+    }
+}
+
 tasks.register<Test>("e2eTest") {
     description = "Runs the app E2E suite against a separate Mock Supplier process."
     group = "verification"
@@ -63,6 +69,325 @@ tasks.register<Test>("e2eTest") {
         check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
         val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
         val process = ProcessBuilder(javaExecutable.absolutePath, "-jar", mockSupplierJar.absolutePath, "--server.port=$e2eMockSupplierPort")
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2ePartialSupplierFailureTest") {
+    description = "Runs the partial Supplier failure E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchPartialSupplierFailureEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.a-availability-mode=SUPPLIER_ERROR",
+        )
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eSupplierBProtocolFailureTest") {
+    description = "Runs the Supplier B body-level failure E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchSupplierBProtocolFailureEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.b-search-mode=SUPPLIER_ERROR",
+        )
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eSupplierATimeoutTest") {
+    description = "Runs the Supplier A response-timeout E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchSupplierATimeoutEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.a-availability-mode=NO_RESPONSE",
+        )
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eAllSupplierFailureTest") {
+    description = "Runs the all-Supplier failure E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchAllSupplierFailureEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.a-availability-mode=SUPPLIER_ERROR",
+            "--mock-supplier.b-search-mode=SUPPLIER_ERROR",
+        )
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eZeroInventoryTest") {
+    description = "Runs the zero-inventory E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchZeroInventoryEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.a-availability-mode=ZERO_INVENTORY",
+        )
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eSupplierABatchingTest") {
+    description = "Runs the Supplier A 50-property batching E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchSupplierABatchingEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.a-catalog-property-count=51",
+        )
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eCatalogIdStabilityTest") {
+    description = "Runs the repeated Catalog synchronization E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.CatalogIdStabilityEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(javaExecutable.absolutePath, "-jar", mockSupplierJar.absolutePath, "--server.port=$e2eMockSupplierPort")
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eCatalogBaselineFailureTest") {
+    description = "Runs the fresh Catalog baseline failure E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchCatalogBaselineFailureEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.a-catalog-mode=SUPPLIER_ERROR",
+        )
+            .redirectErrorStream(true)
+            .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
+            .start()
+        e2eMockSupplierProcess.set(process)
+        repeat(100) {
+            if (runCatching { Socket("localhost", e2eMockSupplierPort).use { } }.isSuccess) return@doFirst
+            Thread.sleep(100)
+        }
+        error("Mock Supplier did not start on port $e2eMockSupplierPort")
+    }
+}
+
+tasks.register<Test>("e2eStaleCatalogBaselineTest") {
+    description = "Runs the stale Catalog baseline E2E suite against a separate Mock Supplier process."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("com.staysupplierhub.SearchStaleCatalogBaselineEndToEndTest")
+    }
+    dependsOn(":mock-supplier:bootJar")
+    finalizedBy(stopE2eMockSupplier)
+    systemProperty("e2e.mock-supplier.base-url", "http://localhost:$e2eMockSupplierPort")
+
+    doFirst {
+        val mockSupplierJar = rootProject.project(":mock-supplier")
+            .layout.buildDirectory.file("libs/mock-supplier.jar").get().asFile
+        check(mockSupplierJar.isFile) { "Mock Supplier boot jar was not built" }
+        val javaExecutable = File(System.getProperty("java.home"), "bin/java.exe")
+        val process = ProcessBuilder(
+            javaExecutable.absolutePath,
+            "-jar",
+            mockSupplierJar.absolutePath,
+            "--server.port=$e2eMockSupplierPort",
+            "--mock-supplier.a-catalog-mode=SUPPLIER_ERROR_AFTER_FIRST_REQUEST",
+        )
             .redirectErrorStream(true)
             .redirectOutput(layout.buildDirectory.file("e2e-mock-supplier.log").get().asFile)
             .start()

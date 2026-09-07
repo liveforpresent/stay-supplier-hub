@@ -2,5 +2,7 @@ server:
   port: 9090
 
 mock-supplier:
+  a-catalog-mode: NORMAL
   a-availability-mode: NORMAL
+  a-catalog-property-count: 1
   b-search-mode: NORMAL

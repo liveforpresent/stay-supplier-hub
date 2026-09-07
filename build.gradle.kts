@@ -1,5 +1,6 @@
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -21,6 +22,10 @@ allprojects {
 }
 
 subprojects {
+    tasks.withType<AbstractArchiveTask>().configureEach {
+        archiveBaseName.set(project.path.removePrefix(":").replace(':', '-'))
+    }
+
     plugins.withId("org.jetbrains.kotlin.jvm") {
         extensions.configure<KotlinJvmProjectExtension> {
             jvmToolchain(25)

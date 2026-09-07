@@ -644,3 +644,39 @@ E2E를 구성했다. 실행 중 Catalog bootstrap은 성공했지만 A/B 가용�
 확인했다. Mock payload를 Supplier별 Availability 계약으로 정렬한 뒤 `200 COMPLETE`, 두 live Offer,
 내부 ID 노출, 영속된 A/B mapping을 자동 검증해 `V-E2E-01`을 PASSING으로 갱신했다.
 
+## AI-026 — 재기동 Catalog ID 안정성 E2E
+
+**Date:** 2026-09-07
+
+AI가 하나의 PostgreSQL Testcontainer와 실제 Mock Supplier를 공유하는 두 ApplicationContext 기동
+E2E를 구성했다. 초기에는 Builder 기본 속성이 `application.yaml`의 미해결 환경변수보다 낮은 우선순위를
+가져 Catalog bootstrap이 시작되기 전에 실패했다. AI가 원인을 설정 소스 우선순위로 분리하고 테스트
+속성을 최우선 `MapPropertySource`로 변경했다.
+
+수정 후 두 번의 Catalog 동기화가 모두 성공했고, 동일 Supplier 외부 identity의 Property와 RoomType
+공개 내부 ID가 동일함을 검증해 `V-E2E-08`을 PASSING으로 갱신했다.
+
+## AI-027 — Fresh Catalog baseline 실패 E2E
+
+**Date:** 2026-09-07
+
+AI가 Supplier A Catalog HTTP 오류와 Supplier B 정상 Catalog을 분리 주입하는 Mock 모드 및 fresh DB
+E2E를 구성했다. 초기 Mock 확장에서 Kotlin 기본 생성자 인자로 인해 Spring 실행 jar가 주입 생성자를
+선택하지 못하는 문제를 확인했고, 기본 인자를 제거해 모든 주입 인자를 명시적으로 제공하도록 수정했다.
+
+실제 E2E는 A persisted state가 비어 있고 B mapping만 저장된 상태에서 readiness gate가 닫히며,
+Search가 빈 `200`이 아닌 A-only `503 SEARCH_UNAVAILABLE`을 반환함을 검증해 `V-E2E-09`을 PASSING으로
+갱신했다.
+
+## AI-028 — 제출 전 최종 Gradle 게이트 정상화
+
+**Date:** 2026-09-07
+
+AI가 제출 전 `clean test`와 `build`를 실행해 E2E 클래스가 일반 테스트 태스크에 섞여 있는 배선 오류와,
+중첩 모듈 두 개가 동일한 `application.jar` 이름을 생성하는 Boot JAR 중복 오류를 확인했다. 일반
+`:app:test`에서는 `*EndToEndTest`를 제외하고 전용 E2E 태스크만 해당 클래스를 실행하게 했으며, archive
+이름을 Gradle 프로젝트 경로 기반으로 고유화했다.
+
+수정 후 23개 테스트 리포트의 149개 테스트가 실패·오류 없이 통과했고, `./gradlew.bat build`도
+`BUILD SUCCESSFUL`로 완료됐다. 사용자는 추가 기능보다 제출 가능 증거를 우선하는 방향을 선택했다.
+

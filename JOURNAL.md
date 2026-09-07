@@ -962,3 +962,40 @@ Mock 응답을 각 Supplier Availability payload 계약에 정의된 필드만 �
 `:mock-supplier`, PostgreSQL Testcontainers, `:app`을 함께 기동하는 E2E에서 startup Catalog sync,
 영속된 mapping, `200 COMPLETE`, A/B live Offer를 확인했다.
 
+## Day 8 — 독립 ApplicationContext E2E의 설정 우선순위
+
+**Type:** Verification / Test-fixture correction
+
+동일 PostgreSQL을 대상으로 애플리케이션을 두 번 기동하는 Catalog ID 안정성 E2E에서
+`SpringApplicationBuilder.properties(...)`를 사용했다. 이는 기본값 우선순위여서
+`application.yaml`의 미해결 `SNOWFLAKE_NODE_ID` placeholder보다 낮았고, Catalog bootstrap 전에
+설정 바인딩이 실패했다.
+
+테스트 전용 속성을 `MapPropertySource`의 최우선 환경 소스로 제공하도록 변경했다. 이로써 실제
+Catalog bootstrap을 두 번 수행하고 동일 Supplier 외부 identity의 Property/RoomType 내부 ID가
+그대로 유지됨을 검증했다.
+
+## Day 8 — Spring 주입 생성자에 Kotlin 기본 인자 추가 시의 기동 실패
+
+**Type:** Test-fixture correction
+
+Mock Supplier에 Catalog 오류 모드를 추가하면서 Spring이 주입하는 주 생성자 끝에 Kotlin 기본 인자를
+추가했다. 단위 테스트의 직접 생성은 통과했지만, 실행 jar에서는 Spring이 주입 가능한 생성자를 선택하지
+못하고 기본 생성자를 찾으려 해 기동에 실패했다.
+
+기본 인자를 제거하고 모든 생성자 인자를 Spring `@Value` 또는 Bean으로 명시했다. 직접 생성하는
+테스트 fixture도 Catalog mode를 명시하도록 정렬했으며, fresh Catalog baseline 실패 E2E가 이를
+재검증한다.
+
+## Day 8 — 최종 빌드에서 발견한 테스트·산출물 배선 충돌
+
+**Type:** Build / release verification
+
+전체 `clean test`에서 별도 Mock Supplier 프로세스를 요구하는 `*EndToEndTest`가 일반 `:app:test`에도
+포함되어, 전용 E2E 태스크만 제공하는 시스템 속성 없이 실행됐다. 일반 테스트는 E2E 클래스를 제외하고,
+각 E2E 전용 태스크가 실제 Mock Supplier와 함께 실행하도록 역할을 분리했다.
+
+이어진 `build`에서는 `:catalog:application`과 `:search:application`이 같은 `application.jar` 이름으로
+Boot JAR에 포함되어 중복 항목 오류가 발생했다. 모든 모듈 archive 이름을 Gradle 프로젝트 경로 기반으로
+고유화했다. 이후 전체 clean test와 build가 통과했다.
+

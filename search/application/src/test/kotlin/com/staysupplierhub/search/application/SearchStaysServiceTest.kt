@@ -39,9 +39,30 @@ class SearchStaysServiceTest {
 
         assertEquals(2, result.offers.size)
         assertTrue(result.failures.isEmpty())
+        assertEquals(setOf("Catalog A", "Catalog B"), result.offers.map { it.propertyName }.toSet())
         assertEquals(setOf("Catalog A room", "Catalog B room"), result.offers.map { it.roomTypeName }.toSet())
+        assertEquals(setOf(2), result.offers.map { it.maxOccupancy }.toSet())
         assertEquals(setOf(a, b), result.offers.map { it.supplierId }.toSet())
         assertTrue(result.offers.all { it.availability.availableRooms == 1 })
+    }
+
+    @Test
+    fun `derives whole stay availability from the lowest daily inventory`() {
+        val inventories = listOf(
+            DailyInventory(LocalDate.of(2026, 9, 1), 3),
+            DailyInventory(LocalDate.of(2026, 9, 2), 1),
+            DailyInventory(LocalDate.of(2026, 9, 3), 5),
+        )
+        val service = serviceFromOutcomes(mapOf(a to completed(item("a-property", "a-room", inventories)), b to completed()))
+        val threeNightCondition = SearchCondition(
+            StayPeriod(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 4)),
+            GuestComposition(2, 0),
+        )
+
+        val result = assertIs<SearchOutcome.Result>(service.search(threeNightCondition))
+
+        assertEquals(1, result.offers.single().availability.availableRooms)
+        assertTrue(result.failures.isEmpty())
     }
 
     @Test
