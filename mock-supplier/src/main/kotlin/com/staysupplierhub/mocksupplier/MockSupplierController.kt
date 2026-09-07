@@ -49,9 +49,9 @@ class MockSupplierController(
 
     private companion object {
         val A_CATALOG = """{"items":[{"hotelCode":"hotel-a","hotelName":"Mock A Hotel","roomTypes":[{"roomTypeCode":"room-a","roomTypeName":"Standard","maxOccupancy":2}]}]}"""
-        val A_AVAILABILITY = """{"items":[{"hotelCode":"hotel-a","hotelName":"Mock A Hotel","roomTypeCode":"room-a","roomTypeName":"Standard","maxOccupancy":2,"breakfastIncluded":true,"currency":"KRW","dailyRates":[{"date":"2026-09-01","remainingRooms":3,"nightlyRate":100,"taxAmount":10},{"date":"2026-09-02","remainingRooms":3,"nightlyRate":100,"taxAmount":10}]}]}"""
+        val A_AVAILABILITY = """{"items":[{"hotelCode":"hotel-a","roomTypeCode":"room-a","breakfastIncluded":true,"currency":"KRW","dailyRates":[{"date":"2026-09-01","remainingRooms":3,"nightlyRate":100,"taxAmount":10},{"date":"2026-09-02","remainingRooms":3,"nightlyRate":100,"taxAmount":10}]}]}"""
         val B_CATALOG = """{"resultCode":"0000","resultMessage":"ok","data":{"items":[{"propertyId":"property-b","propertyName":"Mock B Property","rooms":[{"roomId":"room-b","roomName":"Standard","maxOccupancy":2}]}]}}"""
-        val B_AVAILABILITY = """{"resultCode":"0000","resultMessage":"ok","data":{"items":[{"propertyId":"property-b","propertyName":"Mock B Property","roomId":"room-b","roomName":"Standard","maxOccupancy":2,"breakfastIncluded":true,"currency":"KRW","totalPrice":220,"taxIncluded":true,"inventory":[{"date":"2026-09-01","remainingRooms":3},{"date":"2026-09-02","remainingRooms":3}]}]}}"""
+        val B_AVAILABILITY = """{"resultCode":"0000","resultMessage":"ok","data":{"items":[{"propertyId":"property-b","roomId":"room-b","breakfastIncluded":true,"currency":"KRW","totalPrice":220,"taxIncluded":true,"inventory":[{"date":"2026-09-01","remainingRooms":3},{"date":"2026-09-02","remainingRooms":3}]}]}}"""
     }
 }
 

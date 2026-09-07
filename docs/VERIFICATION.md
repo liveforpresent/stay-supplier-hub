@@ -500,13 +500,19 @@ PostgreSQL Testcontainers
 
 Do not substitute H2.
 
+Evidence for the PASSING constraint rows in this section:
+
+```text
+:catalog:adapter:persistence:test --tests com.staysupplierhub.catalog.adapter.persistence.CatalogPersistenceAdapterTest
+```
+
 ## Constraints
 
 | ID | Priority | Method | Scenario | Expected | Status |
 |---|---|---|---|---|---|
-| `V-PER-CON-01` | P0 | PERSISTENCE_INTEGRATION | Duplicate `(supplier_id, supplier_property_code)` | DB rejects | PLANNED |
-| `V-PER-CON-02` | P0 | PERSISTENCE_INTEGRATION | Duplicate `(property_id, supplier_room_type_code)` | DB rejects | PLANNED |
-| `V-PER-CON-03` | P0 | PERSISTENCE_INTEGRATION | RoomType references missing Property | FK rejects | PLANNED |
+| `V-PER-CON-01` | P0 | PERSISTENCE_INTEGRATION | Duplicate `(supplier_id, supplier_property_code)` | DB rejects | PASSING |
+| `V-PER-CON-02` | P0 | PERSISTENCE_INTEGRATION | Duplicate `(property_id, supplier_room_type_code)` | DB rejects | PASSING |
+| `V-PER-CON-03` | P0 | PERSISTENCE_INTEGRATION | RoomType references missing Property | FK rejects | PASSING |
 
 ## Mapping
 
@@ -673,7 +679,7 @@ real :mock-supplier application
 
 | ID | Priority | Scenario | Expected | Status |
 |---|---|---|---|---|
-| `V-E2E-01` | P0 | Startup Catalog sync → mappings persisted → A/B Search normal | `200 COMPLETE`, internal IDs + live Offers | PLANNED |
+| `V-E2E-01` | P0 | Startup Catalog sync → mappings persisted → A/B Search normal | `200 COMPLETE`, internal IDs + live Offers | PASSING |
 | `V-E2E-02` | P0 | Supplier A HTTP error + B normal | `200 PARTIAL`, B Offers preserved | PLANNED |
 | `V-E2E-03` | P0 | A normal + B HTTP 200 with `E503` | `200 PARTIAL` | PLANNED |
 | `V-E2E-04` | P0 | A no-response + B normal | A timeout does not block B; `200 PARTIAL` | PLANNED |
@@ -684,6 +690,8 @@ real :mock-supplier application
 | `V-E2E-09` | P0 | Fresh DB; A Catalog bootstrap fails, B succeeds; Search endpoint called | `503 SEARCH_UNAVAILABLE`, not `200` empty | PLANNED |
 | `V-E2E-10` | P0 | Existing A state; A startup refresh fails; B refresh succeeds | Search remains available using A stale Catalog baseline | PLANNED |
 | `V-E2E-11` | P1 | Baseline established but no searchable Catalog targets | `200 COMPLETE`, empty offers, no Supplier availability call | PLANNED |
+
+Evidence: `:app:e2eTest` with PostgreSQL Testcontainers and a separately launched real `:mock-supplier` application.
 
 ---
 

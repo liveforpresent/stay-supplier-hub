@@ -634,3 +634,13 @@ Adapter를 검증했다. 실제 Netty `ReadTimeoutException`이 기존 Java `Tim
 `CONNECTION_FAILED`로 잘못 정규화되는 결함을 확인했고, 원인 체인에서 두 timeout 유형을 모두
 `TIMEOUT`으로 정규화하도록 수정했다.
 
+## AI-025 — 정상 검색 E2E와 Mock 응답 계약 정렬
+
+**Date:** 2026-09-07
+
+AI가 실제 `:mock-supplier`, PostgreSQL Testcontainers, `:app` HTTP 서버를 함께 기동하는 정상 검색
+E2E를 구성했다. 실행 중 Catalog bootstrap은 성공했지만 A/B 가용성 응답이 `INVALID_RESPONSE`가 되는
+문제를 분석했고, Mock 응답에 Availability wire DTO가 소유하지 않는 Catalog 전용 필드가 섞여 있음을
+확인했다. Mock payload를 Supplier별 Availability 계약으로 정렬한 뒤 `200 COMPLETE`, 두 live Offer,
+내부 ID 노출, 영속된 A/B mapping을 자동 검증해 `V-E2E-01`을 PASSING으로 갱신했다.
+

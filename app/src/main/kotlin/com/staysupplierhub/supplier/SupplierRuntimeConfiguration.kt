@@ -1,6 +1,7 @@
 package com.staysupplierhub.supplier
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.staysupplierhub.catalog.api.SupplierId
 import com.staysupplierhub.catalog.port.out.supplier.SupplierCatalogPort
 import com.staysupplierhub.integration.suppliera.SupplierAAvailabilityAdapter
@@ -11,6 +12,7 @@ import com.staysupplierhub.search.port.out.supplier.SupplierAvailabilityPort
 import io.netty.channel.ChannelOption
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
@@ -46,6 +48,10 @@ data class SupplierRuntimeProperties(
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(SupplierIntegrationProperties::class)
 class SupplierRuntimeConfiguration {
+    @Bean
+    @ConditionalOnMissingBean(ObjectMapper::class)
+    fun supplierObjectMapper(): ObjectMapper = jacksonObjectMapper()
+
     @Bean
     fun configuredSupplierIds(properties: SupplierIntegrationProperties): Set<SupplierId> =
         properties.configuredSuppliers().keys

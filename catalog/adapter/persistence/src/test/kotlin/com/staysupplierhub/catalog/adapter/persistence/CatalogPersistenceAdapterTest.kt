@@ -15,7 +15,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.persistence.autoconfigure.EntityScan
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +25,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @EnableAutoConfiguration
 @EntityScan(basePackageClasses = [PropertyJpaEntity::class])
@@ -35,7 +38,34 @@ class PersistenceTestApplication
 @Transactional
 class CatalogPersistenceAdapterTest @Autowired constructor(
     private val adapter: CatalogPersistenceAdapter,
+    private val jdbcTemplate: JdbcTemplate,
 ) {
+    @Test
+    fun `database rejects duplicate supplier property mappings`() {
+        insertProperty(id = 1, supplierPropertyCode = "property-code")
+
+        assertFailsWith<DataIntegrityViolationException> {
+            insertProperty(id = 2, supplierPropertyCode = "property-code")
+        }
+    }
+
+    @Test
+    fun `database rejects duplicate room type mappings within a property`() {
+        insertProperty(id = 1)
+        insertRoomType(id = 10, propertyId = 1, supplierRoomTypeCode = "room-code")
+
+        assertFailsWith<DataIntegrityViolationException> {
+            insertRoomType(id = 11, propertyId = 1, supplierRoomTypeCode = "room-code")
+        }
+    }
+
+    @Test
+    fun `database rejects room type without a property`() {
+        assertFailsWith<DataIntegrityViolationException> {
+            insertRoomType(id = 10, propertyId = 999, supplierRoomTypeCode = "room-code")
+        }
+    }
+
     @Test
     fun `persists and reloads complete catalog state`() {
         val property = property()
@@ -111,4 +141,30 @@ class CatalogPersistenceAdapterTest @Autowired constructor(
 
     private fun roomType(id: RoomTypeId, code: String, status: CatalogStatus) =
         RoomType(id, SupplierRoomTypeCode(code), "$code name", 2, status)
+
+    private fun insertProperty(id: Long, supplierPropertyCode: String = "property-$id") {
+        jdbcTemplate.update(
+            """
+            INSERT INTO properties (id, supplier_id, supplier_property_code, name, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """.trimIndent(),
+            id,
+            supplierA.value,
+            supplierPropertyCode,
+            "Property $id",
+        )
+    }
+
+    private fun insertRoomType(id: Long, propertyId: Long, supplierRoomTypeCode: String) {
+        jdbcTemplate.update(
+            """
+            INSERT INTO room_types (id, property_id, supplier_room_type_code, name, max_occupancy, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """.trimIndent(),
+            id,
+            propertyId,
+            supplierRoomTypeCode,
+            "Room type $id",
+        )
+    }
 }
