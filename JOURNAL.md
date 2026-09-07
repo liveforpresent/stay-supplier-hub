@@ -1,10 +1,10 @@
-# JOURNAL.md
+# JOURNAL.md — 엔지니어링 기록
 
 ## Day 1 — 요구사항 해석과 도메인 경계 정의
 
-**Type:** Decision / Significant Work
+**유형:** 결정 / 주요 작업
 
-### Context
+### 맥락
 
 구현을 시작하기 전에 요구사항을 기능 목록으로 바로 옮기기보다, 구현 과정에서 해석이 달라질 수 있는 지점을 먼저 정리했다.
 
@@ -19,7 +19,7 @@
 
 이를 바탕으로 요구사항, 용어, 도메인 규칙, 애플리케이션 흐름을 각각 분리해 정리했다.
 
-### Considered
+### 검토한 대안
 
 초기에는 숙박 상품, Supplier 연동, 실시간 검색을 하나의 큰 도메인으로 다루는 방식과 Supplier Integration까지 별도 Bounded Context로 분리하는 방식도 검토했다.
 
@@ -31,7 +31,7 @@
 
 `RoomType`을 별도 Aggregate로 분리하는 방안도 검토했지만, 현재 요구사항에서는 `RoomType`이 `Property`와 독립적으로 변경되거나 별도의 command/lifecycle/concurrency boundary를 가질 필요가 없었다.
 
-### Decision
+### 결정
 
 도메인 경계를 다음과 같이 정했다.
 
@@ -58,7 +58,7 @@ Aggregate는 `Property`를 Aggregate Root, `RoomType`을 그 내부 Entity로 �
 
 Catalog 동기화는 정상적으로 수집·검증된 전체 snapshot을 기준으로 수행하고, snapshot에서 사라진 상품은 삭제하지 않고 `INACTIVE`로 전환하도록 했다. 이후 동일한 외부 식별자가 다시 등장하면 기존 내부 ID를 유지한 채 재활성화한다.
 
-### Why
+### 이유
 
 가장 중요한 기준은 서로 다른 생명주기와 변경 원인을 가진 데이터를 하나의 모델에 섞지 않는 것이었다.
 
@@ -66,7 +66,7 @@ Catalog와 Search를 분리하면 Supplier의 실시간 재고나 가격 변화�
 
 또한 `Property`와 `RoomType`을 현재 요구사항보다 더 잘게 Aggregate로 분리하지 않음으로써, 실제 독립적인 변경 경계가 없는 상태에서 불필요한 복잡성을 만들지 않도록 했다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 구현 전 다음 기준을 고정했다.
 
@@ -83,9 +83,9 @@ Catalog와 Search를 분리하면 Supplier의 실시간 재고나 가격 변화�
 
 ## Day 2 — 구현 아키텍처와 Supplier 통합 전략 구체화
 
-**Type:** Decision / Significant Work
+**유형:** 결정 / 주요 작업
 
-### Context
+### 맥락
 
 Day 1에서 정한 도메인 경계를 실제 Kotlin/Spring 코드 구조로 어떻게 유지할지 구체화했다.
 
@@ -93,7 +93,7 @@ Day 1에서 정한 도메인 경계를 실제 Kotlin/Spring 코드 구조로 어
 
 또한 Supplier A/B는 가격, 실패 표현, batch 제한 방식이 달라서 공통화 범위를 잘못 잡으면 Supplier-specific semantics를 내부 모델에 끌고 들어오거나, 반대로 실제로 존재하지 않는 정보를 만들어낼 위험이 있었다.
 
-### Considered
+### 검토한 대안
 
 배포 단위까지 Catalog와 Search를 분리하는 Microservice 구조도 가능했지만, 현재 범위에서는 독립 배포나 별도 확장 요구보다 명확한 모델 경계가 더 중요했다.
 
@@ -107,7 +107,7 @@ Supplier Integration에서는 다음 방식을 비교했다.
 
 가격의 경우에도 Supplier A의 일별 가격 구조를 기준으로 모든 Supplier를 맞추는 방식과, Supplier별 가격 모델을 그대로 application까지 노출하는 방식을 검토했다.
 
-### Decision
+### 결정
 
 런타임은 하나의 Spring Boot application을 유지하되 Gradle multi-module 기반의 **Modular Monolith**로 구성하기로 했다.
 
@@ -167,7 +167,7 @@ Supplier fetch
 
 Supplier 응답을 기다리는 동안 DB transaction을 열어 두지 않는다.
 
-### Why
+### 이유
 
 Modular Monolith는 현재 서비스 규모에서 별도 배포 복잡성을 만들지 않으면서도 Catalog/Search 간 의존 방향을 코드 수준에서 명확히 표현할 수 있다.
 
@@ -177,7 +177,7 @@ consumer-owned Port를 사용하면 내부 애플리케이션이 Supplier가 제
 
 Partial failure 정책은 한 외부 Supplier의 장애가 다른 Supplier의 정상 결과까지 무효화하지 않도록 하기 위한 결정이다.
 
-### Verification Strategy
+### 검증 전략
 
 설계 문서만으로 구현 완료 여부를 판단하지 않기 위해 요구사항과 검증 시나리오를 연결하는 기준을 세웠다.
 
@@ -201,7 +201,7 @@ Requirement
 
 Codex가 같은 기준으로 작업할 수 있도록 canonical document, module ownership, 작업 순서, verification rule도 함께 정리했다.
 
-### Project Initialization
+### 프로젝트 초기화
 
 설계 기준을 정리한 뒤 Spring Initializr로 기본 Kotlin/Spring Boot 프로젝트를 생성하고 개인 GitHub repository에 초기 상태를 push했다.
 
@@ -209,7 +209,7 @@ Codex가 같은 기준으로 작업할 수 있도록 canonical document, module 
 
 초기화 자체보다는, 이후 구현이 이미 정의한 도메인 경계와 검증 기준을 따라 진행될 수 있는 출발점을 만든 것에 의미를 두었다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 Day 2 종료 시점에는 다음 구현 기준이 정리됐다.
 
@@ -226,11 +226,11 @@ Day 2 종료 시점에는 다음 구현 기준이 정리됐다.
 
 ---
 
-## Day 3 — Empty Catalog과 Unknown Catalog를 분리
+## Day 3 — 비어 있는 Catalog와 알 수 없는 Catalog를 분리
 
-**Type:** Problem / Decision
+**유형:** 문제 / 결정
 
-### Context
+### 맥락
 
 Startup Catalog synchronization과 Search empty-result 규칙을 함께 검토하면서 의미가 충돌하는 경우를 발견했다.
 
@@ -248,7 +248,7 @@ no searchable target
 동일하게 target이 0개가 된다. 이 상태를 그대로 empty Search로 처리하면 실제로는 검색 대상을 알 수
 없는 장애 상황을 "상품이 없음"으로 잘못 표현하게 된다.
 
-### Considered
+### 검토한 대안
 
 세 가지 방향을 검토했다.
 
@@ -262,7 +262,7 @@ no searchable target
 위해 Catalog synchronization 상태를 Search 계약에 전달해야 했다. 현재 범위에서는 operational state가
 Search 모델에 침투하는 비용이 크다고 판단했다.
 
-### Decision
+### 결정
 
 모든 configured Supplier에 대해 **usable Catalog baseline**이 있는지를 Search traffic의 전제조건으로 둔다.
 
@@ -291,7 +291,7 @@ any baseline unavailable
 이 gate는 `SearchOutcome`에 새로운 상태를 추가하지 않고 application/operational layer에서
 `SearchStaysUseCase` 실행 전에 적용한다.
 
-### Why
+### 이유
 
 Catalog mapping은 단순한 검색 캐시가 아니라 Supplier availability API에 전달할 Property code를 결정하는
 검색의 전제 데이터다.
@@ -312,7 +312,7 @@ Catalog baseline unavailable
 현재 sync가 실패해도 이전 mapping을 baseline으로 사용할 수 있도록 했다. 가격과 재고는 기존 값을
 사용하지 않고 여전히 Search 시점에 Supplier에서 조회한다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 - Fresh DB에서 Catalog bootstrap 실패가 `200 + empty offers`로 오인되지 않는다.
 - 정상적으로 확립된 empty Catalog는 계속 `200 COMPLETE`로 표현할 수 있다.
@@ -321,7 +321,7 @@ Catalog baseline unavailable
 - `REQUIREMENTS.md`, `GLOSSARY.md`, `ARCHITECTURE.md`, `USE_CASES.md`, `PERSISTENCE.md`,
   `API.md`, `VERIFICATION.md`에 동일한 기준을 반영했다.
 
-### Known Limitation
+### 알려진 한계
 
 현재는 별도의 Supplier Catalog synchronization metadata를 저장하지 않는다.
 
@@ -334,11 +334,11 @@ Supplier별 `lastSuccessfulCatalogSync`와 같은 metadata persistence를 추가
 
 ---
 
-## Day 3 — Supplier별 정보 차이를 공통 모델에 어떻게 반영할지 결정
+## Day 3 — Supplier별 정보 차이를 공통 모델에 반영하는 방법 결정
 
-**Type:** Decision
+**유형:** 결정
 
-### Context
+### 맥락
 
 Supplier A와 B의 응답을 하나의 Search 모델로 정규화하면서, 단순히 공통 DTO를 만드는 것만으로는
 어떤 정보를 유지하고 어떤 정보를 잃는지 설명하기 어려웠다.
@@ -350,7 +350,7 @@ A의 더 풍부한 구조를 공통 모델의 기준으로 삼으면 B에 없는
 또한 availability 응답에는 Catalog에도 존재하는 이름과 `maxOccupancy`가 반복되고, 일별 inventory는
 연박 가능 객실 수 계산에는 필요하지만 public Search 계약에서 그대로 노출할 필요는 없다.
 
-### Considered
+### 검토한 대안
 
 정보 처리를 단순한 "유지 / 삭제"가 아니라 다음 네 가지로 구분했다.
 
@@ -364,7 +364,7 @@ DISCARD
 공통 모델을 가장 정보가 많은 Supplier 기준으로 만드는 방식도 검토했다. 하지만 이는 다른 Supplier가
 제공하지 않는 세부 데이터를 공통 계약에 포함시키고 null 또는 추정값을 유도할 수 있어 제외했다.
 
-### Decision
+### 결정
 
 공통 모델은 **모든 Supplier가 진실하게 제공할 수 있으면서 통합 Search에 필요한 가장 좁은 공통 의미**
 를 기준으로 설계한다.
@@ -417,7 +417,7 @@ Availability 응답에 반복되는 이름과 occupancy는 Catalog를 갱신하�
 외부 code와 raw Supplier error는 내부 mapping/diagnostics에는 사용하지만 public Search contract에는
 노출하지 않는다.
 
-### Why
+### 이유
 
 공통화의 목적은 Supplier payload를 구조적으로 동일하게 만드는 것이 아니라, Supplier 차이를 숨기면서도
 의미를 왜곡하지 않는 안정적인 내부 계약을 만드는 것이다.
@@ -429,7 +429,7 @@ Availability 응답에 반복되는 이름과 occupancy는 Catalog를 갱신하�
 정보 손실은 무조건 피해야 하는 것이 아니라, downstream에서 필요하지 않고 다른 Supplier가 동등하게
 보장할 수 없는 세부 표현이라면 의도적으로 제거하는 편이 더 정확하다고 판단했다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 - 공통 가격 모델을 whole-stay total + currency로 고정했다.
 - Supplier A nightly/tax breakdown은 derivation input으로만 사용한다.
@@ -443,9 +443,9 @@ Availability 응답에 반복되는 이름과 occupancy는 Catalog를 갱신하�
 
 ## Day 3 — 전체 도메인 설계와 과설계 사이의 경계 정하기
 
-**Type:** Decision
+**유형:** 결정
 
-### Context
+### 맥락
 
 요구사항의 "설계는 전체 도메인을 다룬다"는 문장을 현재 Catalog/Search 설계에 어떻게 반영할지 검토했다.
 
@@ -459,7 +459,7 @@ conversion, canonicalization, cache, quarantine 같은 개념은 하나의 `Deli
 반대로 "전체 도메인"을 숙박 플랫폼 전체로 해석해 Reservation, Payment, Pricing, Inventory 등의
 Bounded Context와 Aggregate를 미리 설계하면 구체 요구사항이 없는 상태에서 미래 구조를 추측하게 된다.
 
-### Considered
+### 검토한 대안
 
 #### 미래 Bounded Context를 미리 설계
 
@@ -473,12 +473,12 @@ Bounded Context와 Aggregate를 미리 설계하면 구체 요구사항이 없�
 현재 구현과 가장 정확히 일치하지만, cross-Supplier identity, Reservation, currency, cache 같은 인접
 문제를 어떤 기준으로 제외했는지가 드러나지 않는다.
 
-#### Current Core + Adjacent Capability + Evolution Trigger
+#### 현재 핵심 + 인접 capability + 진화 조건
 
 현재 Bounded Context는 Catalog/Search로 유지하면서, 주변 영역은 현재 제외 이유와
 "어떤 요구가 생기면 경계를 다시 검토할지"까지 문서화한다.
 
-### Decision
+### 결정
 
 전체 relevant domain을 다음 다섯 범주로 나눈다.
 
@@ -542,7 +542,7 @@ Sorting/Pagination
 
 Reservation은 adjacent optional evolution으로, Payment는 명시적 OOS로 구분한다.
 
-### Why
+### 이유
 
 전체 도메인을 다룬다는 것은 가능한 모든 미래 기능의 Aggregate를 미리 만드는 것이 아니라,
 현재 문제 공간과 주변 경계를 이해하고 **왜 지금 이 모델까지만 필요한지 설명할 수 있는 것**이라고
@@ -560,7 +560,7 @@ broader domain awareness
 
 을 원칙으로 삼는다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 - `DOMAIN.md`의 단일 unmodeled 목록을 `Domain Scope & Evolution` 구조로 재정리했다.
 - Catalog/Search만 현재 Bounded Context로 유지한다.
@@ -575,9 +575,9 @@ broader domain awareness
 
 ## Day 3 — Batch 동시성 5의 의미와 범위를 구체화
 
-**Type:** Decision / Scalability
+**유형:** 결정 / 확장성
 
-### Context
+### 맥락
 
 Supplier availability API는 한 요청에 최대 50개 Property code만 받을 수 있으므로, 검색 대상이 수천 개로
 늘어나면 하나의 Supplier에도 수십 개 batch가 생긴다.
@@ -588,9 +588,9 @@ Supplier availability API는 한 요청에 최대 50개 Property code만 받을 
 또한 `response timeout=2s`와 bounded concurrency를 함께 사용하면 전체 Supplier 실행도 2초 안에
 끝난다고 오해할 수 있음을 발견했다.
 
-### Considered
+### 검토한 대안
 
-#### Concurrency = 1
+#### 동시성 = 1
 
 upstream 부하는 작지만 독립적인 외부 I/O를 순차 처리하므로 batch 수가 증가할수록 latency가
 불필요하게 증가한다.
@@ -601,12 +601,12 @@ latency는 줄어들 수 있지만 Supplier SLA, rate-limit capacity, safe concu
 한 고객 요청이 수십 개 HTTP call을 동시에 만들고 여러 고객 요청이 겹치면 upstream pressure가
 급격히 커질 수 있다.
 
-#### Conservative configurable default
+#### 보수적인 설정 가능 기본값
 
 순차 실행을 피하되 한 Supplier에 대한 동시 outbound call을 유한하게 제한하는 초기값을 두고,
 운영 지표로 Supplier별 튜닝한다.
 
-### Decision
+### 결정
 
 초기값 `5`를 유지한다.
 
@@ -649,7 +649,7 @@ Supplier A adapter
 Search마다 새 limiter를 만들면 동시에 여러 Search가 들어왔을 때 configured limit이 곱해져
 upstream-protection이라는 목적을 충족하지 못한다.
 
-### Execution latency distinction
+### 실행 latency 구분
 
 개별 HTTP response timeout과 Supplier 전체 execution deadline을 분리한다.
 
@@ -679,7 +679,7 @@ not-yet-started batch를 중단하는 방향을 검토한다.
 
 Concurrency 값을 크게 올리는 것으로 이 latency 문제를 해결하지 않는다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 - `maxBatchConcurrency=5`의 근거를 명시했다.
 - limit을 Supplier별 / application-instance 범위의 shared limiter로 고정했다.
@@ -689,16 +689,16 @@ Concurrency 값을 크게 올리는 것으로 이 latency 문제를 해결하지
 
 ---
 
-## Day 3 — Engineering Journal과 AI 활용 기록의 역할 분리
+## Day 3 — 엔지니어링 기록과 AI 활용 기록의 역할 분리
 
-**Type:** Process Decision
+**유형:** 프로세스 결정
 
-### Context
+### 맥락
 
 설계 과정에서 AI를 여러 차례 활용하면서 `JOURNAL.md` 하나에 엔지니어링 판단과 AI 사용 내역을 모두
 기록하면 문서가 설계 이력, AI transcript, 일일 작업 로그가 섞인 형태가 될 수 있다고 판단했다.
 
-### Decision
+### 결정
 
 프로세스 기록을 다음처럼 분리한다.
 
@@ -723,12 +723,12 @@ Routine CRUD, 파일 생성, dependency 추가, 포맷팅, 단순 boilerplate, c
 과거 AI 활용은 실제로 있었던 주요 decision cluster만 복원하며, 없었던 시행착오나 rejected suggestion을
 평가 목적상 만들어내지 않는다.
 
-### Why
+### 이유
 
 평가자가 설계 의사결정의 흐름과 AI를 활용한 방식을 각각 빠르게 확인할 수 있고, canonical docs와
 process history의 역할도 혼동되지 않는다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 - root에 `AI_USAGE.md`를 별도 유지한다.
 - `JOURNAL.md`는 engineering history에 집중한다.
@@ -737,11 +737,11 @@ process history의 역할도 혼동되지 않는다.
 
 ---
 
-## Day 3 — Public 문서를 외부 reference의 대체본으로 만들지 않기
+## Day 3 — 공개 문서를 외부 reference의 대체본으로 만들지 않기
 
-**Type:** Process / Repository Decision
+**유형:** 프로세스 / repository 결정
 
-### Context
+### 맥락
 
 코드와 설계 문서는 public repository에서 충분히 설명되어야 하지만, project documentation이 외부
 reference 문서를 섹션별로 다시 작성하거나 field dictionary/payload를 그대로 재구성하는 형태가 되면
@@ -750,7 +750,7 @@ reference 문서를 섹션별로 다시 작성하거나 field dictionary/payload
 또한 current tree에서 파일을 삭제해도 과거 commit에 남은 blob, filename, commit message, secret은
 public Git history에서 계속 확인할 수 있다.
 
-### Decision
+### 결정
 
 `REQUIREMENTS.md`는 외부 provenance 문서가 아니라 **현재 project contract**로 유지한다.
 
@@ -791,13 +791,13 @@ complete Git history
 
 과거 commit에 restricted material이나 secret이 들어간 경우 later deletion만으로 완료 처리하지 않는다.
 
-### Why
+### 이유
 
 Public repository의 목적은 project implementation과 engineering judgment를 보여주는 것이다.
 외부 reference를 다시 배포하지 않으면서도 코드가 왜 그렇게 동작하는지 설명하는 데 필요한 protocol
 semantics는 충분히 남길 수 있다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 - provenance-specific requirement classification을 repository-neutral classification으로 교체했다.
 - `REQUIREMENTS.md`를 project contract로 명확히 했다.
@@ -807,11 +807,11 @@ semantics는 충분히 남길 수 있다.
 
 ---
 
-## Day 3 — Agent가 한 구현 Slice마다 증거와 판단을 드러내도록 작업 경계 설정
+## Day 3 — Agent가 한 구현 slice마다 증거와 판단을 드러내도록 작업 경계 설정
 
-**Type:** Process / Agent Workflow Decision
+**유형:** 프로세스 / Agent workflow 결정
 
-### Context
+### 맥락
 
 AI agent가 문서를 읽고 프로젝트 전체를 자동 완성하는 방식보다, 한 번에 하나의 coherent implementation
 slice를 구현하고 검증한 뒤 멈추는 방식이 이 프로젝트의 목적에 더 적합하다고 판단했다.
@@ -819,7 +819,7 @@ slice를 구현하고 검증한 뒤 멈추는 방식이 이 프로젝트의 목�
 중간 checkpoint가 없으면 실제 구현 중 발견된 문제, trade-off, root cause, verification evidence가
 최종 결과에 묻힐 수 있다. 반대로 파일/클래스마다 멈추면 작업 흐름이 지나치게 잘게 쪼개진다.
 
-### Decision
+### 결정
 
 Checkpoint 단위는 파일이 아니라:
 
@@ -857,12 +857,12 @@ mapping을 구현 전에 억지로 만들지 않는다.
 Commit boundary는 coherent behavior + verification 완료 시점으로 잡고, agent는 사용자 요청 없이
 직접 commit하지 않는다.
 
-### Why
+### 이유
 
 이 방식은 agent의 구현 속도는 활용하면서도, 프로젝트에서 중요한 판단·문제 해결·검증 과정을
 사람이 확인하고 이해한 상태로 남길 수 있다.
 
-### Outcome / Impact
+### 결과 / 영향
 
 - `AGENTS.md`에 checkpoint/stop protocol을 추가했다.
 - Journal/AI usage 후보 기준을 명확히 했다.
@@ -872,7 +872,7 @@ Commit boundary는 coherent behavior + verification 완료 시점으로 잡고, 
 
 ## Day 4 — Catalog 검색 projection과 persistence 경계 정렬
 
-**Type:** Problem / Decision
+**유형:** 문제 / 결정
 
 공개 조회를 실제 persistence 계층으로 연결하면서 Aggregate 전체를 읽어 application에서 필터링하는
 방식이 canonical architecture의 projection 경계와 맞지 않음을 확인했다. 조회 서비스는
@@ -884,7 +884,7 @@ Commit boundary는 coherent behavior + verification 완료 시점으로 잡고, 
 
 ## Day 5 — Catalog 동기화 트랜잭션 경계 분리
 
-**Type:** Decision / Verification
+**유형:** 결정 / 검증
 
 Supplier snapshot 조회와 persistence 반영을 분리했다. 조회·검증을 담당하는 서비스는 트랜잭션 없이
 실행하고, `ApplyCatalogSnapshotService`만 동기식 `@Transactional` 메서드에서 reconcile과 저장을 수행한다.
@@ -894,7 +894,7 @@ Supplier별 독립 커밋을 검증했다.
 
 ## Day 6 — Supplier A Catalog adapter BOM 정렬
 
-**Type:** Problem / Decision
+**유형:** 문제 / 결정
 
 Supplier A Catalog 어댑터를 컴파일하면서 모듈에 Spring Boot BOM이 없어 기존 `spring-boot-starter-webclient`도
 버전을 해석하지 못하는 문제를 확인했다. Supplier A 모듈에 BOM을 명시하고, adapter-local Jackson Kotlin
@@ -905,7 +905,7 @@ Supplier A Catalog 어댑터를 컴파일하면서 모듈에 Spring Boot BOM이 
 
 ## Day 7 — 연결 거부 테스트에서 포트 예약과 실제 거부의 차이
 
-**Type:** Verification / Test-fixture correction
+**유형:** 검증 / test-fixture 수정
 
 Supplier B Availability Adapter의 `CONNECTION_FAILED` 검증에서 `HttpServer.create(...)`로 포트만 예약하고
 시작하지 않은 서버를 사용했다. 이 상태에서는 TCP 연결이 즉시 거부되지 않고 연결이 성립한 뒤 응답을
@@ -919,7 +919,7 @@ Supplier B Availability Adapter의 `CONNECTION_FAILED` 검증에서 `HttpServer.
 
 ## Day 7 — Supplier B Catalog 검증 추적 보완
 
-**Type:** Verification traceability
+**유형:** 검증 추적성
 
 Supplier B Catalog의 complete snapshot 및 fail-closed 규칙은 canonical integration 계약에 있었지만,
 검증 매트릭스에는 Supplier B Availability와 달리 이를 직접 소유하는 `V-*` 시나리오가 없었다.
@@ -930,7 +930,7 @@ Supplier B Catalog의 complete snapshot 및 fail-closed 규칙은 canonical inte
 
 ## Day 7 — Composition Root의 직접 의존성 명시
 
-**Type:** Architecture alignment
+**유형:** architecture 정렬
 
 `:app`이 Supplier Availability Port map과 `ObjectMapper`를 직접 조립하는 runtime wiring을 추가하면서,
 Supplier 모듈의 implementation 의존성이 App compile classpath에 노출될 것이라는 가정이 드러났다.
@@ -940,7 +940,7 @@ Composition Root가 사용하는 `:search:port`와 Jackson Kotlin 모듈을 `:ap
 
 ## Day 7 — Netty timeout 예외의 명시적 정규화
 
-**Type:** Defect / resilience verification
+**유형:** 결함 / resilience 검증
 
 연결은 성공했지만 응답하지 않는 upstream을 100ms response timeout으로 호출한 결과, Netty는
 `ReadTimeoutException`을 반환했다. 기존 Adapter는 Java `TimeoutException`만 검사해 이를
@@ -951,7 +951,7 @@ connected-but-stalled HTTP stub으로 수정 전 실패와 수정 후 통과를 
 
 ## Day 8 — E2E가 발견한 Mock Supplier 응답 계약 불일치
 
-**Type:** Defect / Test-fixture correction
+**유형:** 결함 / test-fixture 수정
 
 정상 검색 E2E에서 Catalog 동기화와 readiness는 통과했지만 두 Supplier의 가용성 결과가 모두
 `INVALID_RESPONSE`로 정규화됐다. 원인은 Mock Supplier 가용성 응답에 Catalog 전용 이름·수용 인원
@@ -964,7 +964,7 @@ Mock 응답을 각 Supplier Availability payload 계약에 정의된 필드만 �
 
 ## Day 8 — 독립 ApplicationContext E2E의 설정 우선순위
 
-**Type:** Verification / Test-fixture correction
+**유형:** 검증 / test-fixture 수정
 
 동일 PostgreSQL을 대상으로 애플리케이션을 두 번 기동하는 Catalog ID 안정성 E2E에서
 `SpringApplicationBuilder.properties(...)`를 사용했다. 이는 기본값 우선순위여서
@@ -977,7 +977,7 @@ Catalog bootstrap을 두 번 수행하고 동일 Supplier 외부 identity의 Pro
 
 ## Day 8 — Spring 주입 생성자에 Kotlin 기본 인자 추가 시의 기동 실패
 
-**Type:** Test-fixture correction
+**유형:** test-fixture 수정
 
 Mock Supplier에 Catalog 오류 모드를 추가하면서 Spring이 주입하는 주 생성자 끝에 Kotlin 기본 인자를
 추가했다. 단위 테스트의 직접 생성은 통과했지만, 실행 jar에서는 Spring이 주입 가능한 생성자를 선택하지
@@ -989,7 +989,7 @@ Mock Supplier에 Catalog 오류 모드를 추가하면서 Spring이 주입하는
 
 ## Day 8 — 최종 빌드에서 발견한 테스트·산출물 배선 충돌
 
-**Type:** Build / release verification
+**유형:** build / release 검증
 
 전체 `clean test`에서 별도 Mock Supplier 프로세스를 요구하는 `*EndToEndTest`가 일반 `:app:test`에도
 포함되어, 전용 E2E 태스크만 제공하는 시스템 속성 없이 실행됐다. 일반 테스트는 E2E 클래스를 제외하고,
