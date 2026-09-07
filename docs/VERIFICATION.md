@@ -657,6 +657,10 @@ Keep verification shallow.
 | `V-MCK-06` | P0 | COMPONENT_TEST | B search normal | `resultCode=0000` | PASSING |
 | `V-MCK-07` | P0 | COMPONENT_TEST | B search supplier-error | Non-`0000` resultCode | PASSING |
 | `V-MCK-08` | P0 | COMPONENT_TEST | B search no-response | Response intentionally withheld | PASSING |
+| `V-MCK-09` | P0 | COMPONENT_TEST | A availability one stay date inventory = 0 | Valid zero-inventory response | PASSING |
+| `V-MCK-10` | P0 | COMPONENT_TEST | A Catalog 51 Properties | Distinct valid A Catalog response for batching verification | PASSING |
+| `V-MCK-11` | P0 | COMPONENT_TEST | A Catalog supplier-error | Declared error behavior | PASSING |
+| `V-MCK-12` | P0 | COMPONENT_TEST | A Catalog succeeds once, then supplier-error | Valid initial Catalog followed by refresh error | PASSING |
 
 Catalog endpoints need no error mode unless later required.
 
@@ -680,18 +684,37 @@ real :mock-supplier application
 | ID | Priority | Scenario | Expected | Status |
 |---|---|---|---|---|
 | `V-E2E-01` | P0 | Startup Catalog sync → mappings persisted → A/B Search normal | `200 COMPLETE`, internal IDs + live Offers | PASSING |
-| `V-E2E-02` | P0 | Supplier A HTTP error + B normal | `200 PARTIAL`, B Offers preserved | PLANNED |
-| `V-E2E-03` | P0 | A normal + B HTTP 200 with `E503` | `200 PARTIAL` | PLANNED |
-| `V-E2E-04` | P0 | A no-response + B normal | A timeout does not block B; `200 PARTIAL` | PLANNED |
-| `V-E2E-05` | P0 | Every relevant Supplier fails after baseline established | `503 SEARCH_UNAVAILABLE` | PLANNED |
-| `V-E2E-06` | P0 | One required stay date inventory = 0 | Offer returned with `availableRooms=0` | PLANNED |
-| `V-E2E-07` | P0 | >50 mapped Properties for one Supplier | Multiple requests; valid combined result | PLANNED |
-| `V-E2E-08` | P1 | Same Catalog synced again | Public internal IDs remain stable | PLANNED |
-| `V-E2E-09` | P0 | Fresh DB; A Catalog bootstrap fails, B succeeds; Search endpoint called | `503 SEARCH_UNAVAILABLE`, not `200` empty | PLANNED |
-| `V-E2E-10` | P0 | Existing A state; A startup refresh fails; B refresh succeeds | Search remains available using A stale Catalog baseline | PLANNED |
+| `V-E2E-02` | P0 | Supplier A HTTP error + B normal | `200 PARTIAL`, B Offers preserved | PASSING |
+| `V-E2E-03` | P0 | A normal + B HTTP 200 with `E503` | `200 PARTIAL` | PASSING |
+| `V-E2E-04` | P0 | A no-response + B normal | A timeout does not block B; `200 PARTIAL` | PASSING |
+| `V-E2E-05` | P0 | Every relevant Supplier fails after baseline established | `503 SEARCH_UNAVAILABLE` | PASSING |
+| `V-E2E-06` | P0 | One required stay date inventory = 0 | Offer returned with `availableRooms=0` | PASSING |
+| `V-E2E-07` | P0 | >50 mapped Properties for one Supplier | Multiple requests; valid combined result | PASSING |
+| `V-E2E-08` | P1 | Same Catalog synced again | Public internal IDs remain stable | PASSING |
+| `V-E2E-09` | P0 | Fresh DB; A Catalog bootstrap fails, B succeeds; Search endpoint called | `503 SEARCH_UNAVAILABLE`, not `200` empty | PASSING |
+| `V-E2E-10` | P0 | Existing A state; A startup refresh fails; B refresh succeeds | Search remains available using A stale Catalog baseline | PASSING |
 | `V-E2E-11` | P1 | Baseline established but no searchable Catalog targets | `200 COMPLETE`, empty offers, no Supplier availability call | PLANNED |
 
 Evidence: `:app:e2eTest` with PostgreSQL Testcontainers and a separately launched real `:mock-supplier` application.
+
+Evidence for `V-E2E-02`: `:app:e2ePartialSupplierFailureTest` with Supplier A availability mode `SUPPLIER_ERROR` and Supplier B normal.
+
+Evidence for `V-E2E-03`: `:app:e2eSupplierBProtocolFailureTest` with Supplier A normal and Supplier B search mode `SUPPLIER_ERROR` (`HTTP 200 + E503`).
+
+Evidence for `V-E2E-04`: `:app:e2eSupplierATimeoutTest` with Supplier A availability mode `NO_RESPONSE` and Supplier B normal.
+
+Evidence for `V-E2E-05`: `:app:e2eAllSupplierFailureTest` with Supplier A availability and Supplier B search modes `SUPPLIER_ERROR`.
+
+Evidence for `V-E2E-06`: `:app:e2eZeroInventoryTest` with Supplier A availability mode `ZERO_INVENTORY` and Supplier B normal.
+
+Evidence for `V-E2E-07`: `:app:e2eSupplierABatchingTest` with 51 Supplier A Catalog Properties; the search returns 51 A + 1 B Offers and the Mock Supplier records two A availability requests.
+
+Evidence for `V-E2E-08`: `:app:e2eCatalogIdStabilityTest` starts the application twice against one PostgreSQL instance and the same Mock Supplier Catalog snapshot, then compares Property and RoomType public internal IDs.
+
+Evidence for `V-E2E-09`: `:app:e2eCatalogBaselineFailureTest` with Supplier A Catalog mode `SUPPLIER_ERROR` and Supplier B normal; fresh A state keeps the Search readiness gate closed.
+
+Evidence for `V-E2E-10`: `:app:e2eStaleCatalogBaselineTest` with Supplier A Catalog mode `SUPPLIER_ERROR_AFTER_FIRST_REQUEST`; the first startup establishes A state and the second startup preserves its stale baseline while Search returns `200 COMPLETE`.
+
 
 ---
 
@@ -737,8 +760,8 @@ Evidence: `:app:test --tests com.staysupplierhub.supplier.SupplierRuntimeConfigu
 | `V-INFO-01` | P0 | SUPPLIER_INTEGRATION | Supplier A complete nightly price/tax rows | Correct whole-stay gross total; nightly/tax breakdown absent from common Search item | PLANNED |
 | `V-INFO-02` | P0 | SUPPLIER_INTEGRATION | Supplier B valid whole-stay total with tax-inclusive semantics | `totalPrice` preserved; no fabricated nightly/tax values | PLANNED |
 | `V-INFO-03` | P0 | SUPPLIER_INTEGRATION | Supplier B incompatible/malformed tax semantics | Rejected according to normalization policy | PLANNED |
-| `V-INFO-04` | P0 | APPLICATION_UNIT | Complete daily inventory `[3,1,5]` | `availableRooms=1`; daily series need not appear in public DTO | PLANNED |
-| `V-INFO-05` | P0 | APPLICATION_UNIT | Availability response repeats conflicting name/maxOccupancy | Search Offer uses Catalog metadata authority | PLANNED |
+| `V-INFO-04` | P0 | APPLICATION_UNIT | Complete daily inventory `[3,1,5]` | `availableRooms=1`; daily series need not appear in public DTO | PASSING |
+| `V-INFO-05` | P0 | APPLICATION_UNIT | Availability response repeats conflicting name/maxOccupancy | Search Offer uses Catalog metadata authority | PASSING |
 | `V-INFO-06` | P0 | WEB_CONTRACT | Successful Offer response inspected | No external Property/Room codes or nightly/tax breakdown leaked | PLANNED |
 | `V-INFO-07` | P0 | WEB_CONTRACT | Partial Supplier failure | Public response contains degraded Supplier fact, not raw upstream code/body | PLANNED |
 
@@ -1050,8 +1073,8 @@ RES unified B failure judgment
 ## Mock (`MCK`)
 
 ```text
-MCK normal/error/no-response
-→ V-MCK-01..08
+MCK normal/error/no-response/zero-inventory/batching fixture
+→ V-MCK-01..12
 ```
 
 ## Documentation (`DOC`)
@@ -1280,8 +1303,12 @@ SEA-003, SEA-004
 SEA-001, SEA-008, SEA-009, RES-003
 → V-SEA-UC-01 .. V-SEA-UC-10
 → V-SEA-CON-01 .. V-SEA-CON-02
+DEC-SEA-002, SEA-013
+→ V-INFO-04 .. V-INFO-05
 → search/application/src/test/kotlin/com/staysupplierhub/search/application/SearchStaysServiceTest.kt
-→ fake Catalog/Supplier Ports; CountDownLatch concurrency barrier
+→ fake Catalog/Supplier Ports; the availability port carries only live commercial fields,
+  while the test verifies Catalog property/room/occupancy metadata and `[3,1,5] → 1` availability;
+  CountDownLatch concurrency barrier
 ```
 
 ### Supplier B availability request evidence

@@ -25,6 +25,31 @@ class MockSupplierControllerTest : FunSpec({
         controller(supplierA = MockSupplierMode.SUPPLIER_ERROR).supplierAAvailability().statusCode shouldBe HttpStatus.SERVICE_UNAVAILABLE
     }
 
+    test("V-MCK-09: Supplier A availability provides a valid zero-inventory date") {
+        val response = controller(supplierA = MockSupplierMode.ZERO_INVENTORY).supplierAAvailability()
+
+        response.statusCode shouldBe HttpStatus.OK
+        response.body!!.contains("\"remainingRooms\":0") shouldBe true
+    }
+
+    test("V-MCK-10: Supplier A can provide 51 distinct catalog properties for batching verification") {
+        val response = controller(supplierAPropertyCount = 51).supplierACatalog()
+
+        response.statusCode shouldBe HttpStatus.OK
+        response.body!!.contains("\"hotelCode\":\"hotel-a-51\"") shouldBe true
+    }
+
+    test("V-MCK-11: Supplier A catalog reproduces a transport error") {
+        controller(supplierACatalog = MockCatalogMode.SUPPLIER_ERROR).supplierACatalog().statusCode shouldBe HttpStatus.SERVICE_UNAVAILABLE
+    }
+
+    test("V-MCK-12: Supplier A catalog succeeds once then reproduces a refresh error") {
+        val controller = controller(supplierACatalog = MockCatalogMode.SUPPLIER_ERROR_AFTER_FIRST_REQUEST)
+
+        controller.supplierACatalog().statusCode shouldBe HttpStatus.OK
+        controller.supplierACatalog().statusCode shouldBe HttpStatus.SERVICE_UNAVAILABLE
+    }
+
     test("V-MCK-07: Supplier B search reproduces a body-level error over HTTP 200") {
         val response = controller(supplierB = MockSupplierMode.SUPPLIER_ERROR).supplierBSearch()
         response.statusCode shouldBe HttpStatus.OK
@@ -33,7 +58,7 @@ class MockSupplierControllerTest : FunSpec({
 
     test("V-MCK-05: Supplier A availability withholds its response after connection") {
         val hold = MockResponseHold()
-        val worker = Thread { MockSupplierController(MockSupplierMode.NO_RESPONSE, MockSupplierMode.NORMAL, hold).supplierAAvailability() }.apply { start() }
+        val worker = Thread { MockSupplierController(MockSupplierMode.NO_RESPONSE, MockSupplierMode.NORMAL, 1, hold, MockCatalogMode.NORMAL).supplierAAvailability() }.apply { start() }
         hold.awaitEntry()
         worker.isAlive shouldBe true
         hold.release()
@@ -43,7 +68,7 @@ class MockSupplierControllerTest : FunSpec({
 
     test("V-MCK-08: Supplier B search withholds its response after connection") {
         val hold = MockResponseHold()
-        val worker = Thread { MockSupplierController(MockSupplierMode.NORMAL, MockSupplierMode.NO_RESPONSE, hold).supplierBSearch() }.apply { start() }
+        val worker = Thread { MockSupplierController(MockSupplierMode.NORMAL, MockSupplierMode.NO_RESPONSE, 1, hold, MockCatalogMode.NORMAL).supplierBSearch() }.apply { start() }
         hold.awaitEntry()
         worker.isAlive shouldBe true
         hold.release()
@@ -55,4 +80,6 @@ class MockSupplierControllerTest : FunSpec({
 private fun controller(
     supplierA: MockSupplierMode = MockSupplierMode.NORMAL,
     supplierB: MockSupplierMode = MockSupplierMode.NORMAL,
-) = MockSupplierController(supplierA, supplierB, MockResponseHold())
+    supplierAPropertyCount: Int = 1,
+    supplierACatalog: MockCatalogMode = MockCatalogMode.NORMAL,
+) = MockSupplierController(supplierA, supplierB, supplierAPropertyCount, MockResponseHold(), supplierACatalog)
