@@ -65,10 +65,17 @@ class SearchControllerTest {
         mvc { SearchOutcome.Result(emptyList(), emptyList()) }
             .perform(validRequest())
             .andExpect(status().isOk)
-            .andExpect(header().string("Cache-Control", "no-store"))
             .andExpect(jsonPath("$.searchStatus").value("COMPLETE"))
             .andExpect(jsonPath("$.offers").isEmpty)
             .andExpect(jsonPath("$.degradedSuppliers").isEmpty)
+    }
+
+    @Test
+    fun `successful search responses forbid caching`() {
+        mvc { SearchOutcome.Result(emptyList(), emptyList()) }
+            .perform(validRequest())
+            .andExpect(status().isOk)
+            .andExpect(header().string("Cache-Control", "no-store"))
     }
 
     @Test
@@ -88,6 +95,18 @@ class SearchControllerTest {
             .andExpect(header().string("Cache-Control", "no-store"))
             .andExpect(jsonPath("$.code").value("SEARCH_UNAVAILABLE"))
             .andExpect(jsonPath("$.suppliers[0]").value("A"))
+    }
+
+    @Test
+    fun `supplier authentication and rate-limit failures never become public 401 or 429`() {
+        listOf(SearchSupplierFailureType.AUTHENTICATION_FAILED, SearchSupplierFailureType.RATE_LIMITED)
+            .forEach { failureType ->
+                mvc { SearchOutcome.Unavailable(listOf(SupplierFailure(SupplierId("A"), failureType))) }
+                    .perform(validRequest())
+                    .andExpect(status().isServiceUnavailable)
+                    .andExpect(jsonPath("$.code").value("SEARCH_UNAVAILABLE"))
+                    .andExpect(jsonPath("$.suppliers[0]").value("A"))
+            }
     }
 
     @Test
