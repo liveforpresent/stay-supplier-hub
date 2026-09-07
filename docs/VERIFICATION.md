@@ -662,7 +662,8 @@ Keep verification shallow.
 | `V-MCK-11` | P0 | COMPONENT_TEST | A Catalog supplier-error | Declared error behavior | PASSING |
 | `V-MCK-12` | P0 | COMPONENT_TEST | A Catalog succeeds once, then supplier-error | Valid initial Catalog followed by refresh error | PASSING |
 
-Catalog endpoints need no error mode unless later required.
+Supplier A Catalog error modes support the bootstrap baseline scenarios above. Supplier B Catalog has no separate
+error fixture because no current verification scenario requires one.
 
 Evidence: `:mock-supplier:test --tests com.staysupplierhub.mocksupplier.MockSupplierControllerTest`.
 
@@ -839,18 +840,20 @@ README is reader-facing. Detailed design may live under `docs/`.
 
 | ID | Priority | Method | Verification | Status |
 |---|---|---|---|---|
-| `V-DOC-01` | P0 | DOC_REVIEW | README contains build/run instructions | PLANNED |
-| `V-DOC-02` | P0 | DOC_REVIEW | README explains MVC + WebClient programming model | PLANNED |
-| `V-DOC-03` | P0 | DOC_REVIEW | README explains unified Property/RoomType model | PLANNED |
-| `V-DOC-04` | P0 | DOC_REVIEW | README explains stable Supplier-to-internal mapping | PLANNED |
-| `V-DOC-05` | P0 | DOC_REVIEW | README explains Catalog sync timing/lifecycle | PLANNED |
-| `V-DOC-06` | P0 | DOC_REVIEW | README explains partial failure/timeout strategy | PLANNED |
-| `V-DOC-07` | P0 | DOC_REVIEW | README explains preserved/dropped information and rationale | PLANNED |
-| `V-DOC-08` | P0 | DOC_REVIEW | README explains thousands-scale batching/concurrency approach | PLANNED |
-| `V-DOC-09` | P1 | DOC_REVIEW | Design docs are linked/navigable | PLANNED |
-| `V-DOC-10` | P1 | DOC_REVIEW | `JOURNAL.md` records meaningful engineering decisions/problems rather than routine task history | PLANNED |
-| `V-DOC-11` | P0 | DOC_REVIEW | Domain scope/evolution review | Core, adjacent, infrastructure evolution, unmodeled concepts, and explicit OOS are separated; future BCs are not prematurely fixed | PLANNED |
-| `V-DOC-12` | P1 | DOC_REVIEW | README links root-level `JOURNAL.md` and `AI_USAGE.md`; process docs do not override canonical design sources | PLANNED |
+| `V-DOC-01` | P0 | DOC_REVIEW | README contains build/run instructions | MANUAL-PASS |
+| `V-DOC-02` | P0 | DOC_REVIEW | README explains MVC + WebClient programming model | MANUAL-PASS |
+| `V-DOC-03` | P0 | DOC_REVIEW | README explains unified Property/RoomType model | MANUAL-PASS |
+| `V-DOC-04` | P0 | DOC_REVIEW | README explains stable Supplier-to-internal mapping | MANUAL-PASS |
+| `V-DOC-05` | P0 | DOC_REVIEW | README explains Catalog sync timing/lifecycle | MANUAL-PASS |
+| `V-DOC-06` | P0 | DOC_REVIEW | README explains partial failure/timeout strategy | MANUAL-PASS |
+| `V-DOC-07` | P0 | DOC_REVIEW | README explains preserved/dropped information and rationale | MANUAL-PASS |
+| `V-DOC-08` | P0 | DOC_REVIEW | README explains thousands-scale batching/concurrency approach | MANUAL-PASS |
+| `V-DOC-09` | P1 | DOC_REVIEW | Design docs are linked/navigable | MANUAL-PASS |
+| `V-DOC-10` | P1 | DOC_REVIEW | `JOURNAL.md` records meaningful engineering decisions/problems rather than routine task history | MANUAL-PASS |
+| `V-DOC-11` | P0 | DOC_REVIEW | Domain scope/evolution review | Core, adjacent, infrastructure evolution, unmodeled concepts, and explicit OOS are separated; future BCs are not prematurely fixed | MANUAL-PASS |
+| `V-DOC-12` | P1 | DOC_REVIEW | README links root-level `JOURNAL.md` and `AI_USAGE.md`; process docs do not override canonical design sources | MANUAL-PASS |
+
+Evidence: manual review of `README.md`, `JOURNAL.md`, and their linked canonical documents on 2026-09-07.
 
 Public documentation must not copy or substantially reconstruct non-project external reference material.
 

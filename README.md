@@ -4,6 +4,61 @@ Multi-supplier accommodation catalog and live availability integration service.
 
 > Detailed design documentation lives under `docs/`.
 
+## Runtime Flow
+
+At startup, the application synchronizes each configured Supplier Catalog into PostgreSQL. Catalog metadata and
+stable internal IDs are then joined to live availability results during Search:
+
+```text
+HTTP Search
+→ readiness gate
+→ searchable Catalog projection
+→ concurrent Supplier A/B availability calls
+→ Supplier-specific normalization and bounded batching
+→ Catalog join and whole-stay availability derivation
+→ COMPLETE, PARTIAL, or SEARCH_UNAVAILABLE response
+```
+
+The readiness gate remains closed when any configured Supplier has no usable Catalog baseline. A failed refresh
+does not close an already established baseline; Search continues to use its persisted Catalog metadata while live
+availability remains Supplier-owned.
+
+## Build, Test, and Run
+
+Prerequisites: JDK 25, Docker for PostgreSQL Testcontainers during tests, and PostgreSQL for local application
+runtime.
+
+```powershell
+.\gradlew.bat clean test
+.\gradlew.bat build
+```
+
+For local runtime, start the separate Mock Supplier first:
+
+```powershell
+.\gradlew.bat :mock-supplier:bootRun
+```
+
+In another terminal, provide PostgreSQL and Snowflake configuration, then start the application. Supplier A/B use
+the local Mock Supplier defaults unless their URLs and API keys are supplied externally.
+
+```powershell
+$env:SNOWFLAKE_NODE_ID = "1"
+$env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/stay_supplier_hub"
+$env:SPRING_DATASOURCE_USERNAME = "<database-user>"
+$env:SPRING_DATASOURCE_PASSWORD = "<database-password>"
+.\gradlew.bat :app:bootRun
+```
+
+Search is available at:
+
+```text
+GET /api/v1/stays/search?checkIn=2026-09-01&checkOut=2026-09-04&adults=2&children=0
+```
+
+The public request/response contract is defined in [`docs/API.md`](docs/API.md). E2E verification runs against a
+separate Mock Supplier process through the dedicated `:app:e2eTest` and scenario-specific `:app:e2e*Test` tasks.
+
 ## Scope
 
 ### Current core
@@ -37,6 +92,26 @@ operational policy needed to define the boundary correctly.
 - sorting / pagination.
 
 See `docs/DOMAIN.md#8-domain-scope--evolution` for the scope rationale and boundary triggers.
+
+## Architecture Decisions
+
+- **Catalog before live Search** — PostgreSQL retains stable Supplier-backed Property/RoomType identities and
+  metadata. Live availability never mutates that Catalog state; it is joined by Supplier external codes only during
+  a Search.
+- **Spring MVC inbound, WebClient outbound** — inbound HTTP remains conventional Spring MVC while Supplier I/O is
+  performed through WebClient. Blocking JPA work remains outside Supplier network waits.
+- **Supplier-specific ACLs** — A/B protocol DTOs, authentication, failure interpretation, and price translation
+  stay in their integration modules. Search receives only normalized commercial results through consumer-owned
+  Ports.
+- **Open Supplier identity** — `SupplierId` is a string value object. Runtime configuration supplies the active
+  Supplier key set, and the application explicitly assembles `Map<SupplierId, Port>` bindings with fail-fast
+  completeness checks.
+- **Partial results over fabricated success** — a Supplier or batch failure preserves successful independent
+  results and reports a degraded Supplier. When every relevant Supplier fails, the public endpoint returns
+  `503 SEARCH_UNAVAILABLE`.
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/USE_CASES.md`](docs/USE_CASES.md), and
+[`docs/INTEGRATION.md`](docs/INTEGRATION.md) for the precise contracts.
 
 ## Batching & Concurrency
 
