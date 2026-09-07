@@ -672,11 +672,37 @@ Search가 빈 `200`이 아닌 A-only `503 SEARCH_UNAVAILABLE`을 반환함을 �
 
 **Date:** 2026-09-07
 
-AI가 제출 전 `clean test`와 `build`를 실행해 E2E 클래스가 일반 테스트 태스크에 섞여 있는 배선 오류와,
-중첩 모듈 두 개가 동일한 `application.jar` 이름을 생성하는 Boot JAR 중복 오류를 확인했다. 일반
-`:app:test`에서는 `*EndToEndTest`를 제외하고 전용 E2E 태스크만 해당 클래스를 실행하게 했으며, archive
-이름을 Gradle 프로젝트 경로 기반으로 고유화했다.
+### Context
 
-수정 후 23개 테스트 리포트의 149개 테스트가 실패·오류 없이 통과했고, `./gradlew.bat build`도
-`BUILD SUCCESSFUL`로 완료됐다. 사용자는 추가 기능보다 제출 가능 증거를 우선하는 방향을 선택했다.
+제출 전 전체 Gradle 게이트가 일반 테스트 태스크와 Boot JAR 조립에서 모두 통과해야 했다.
+
+### Asked
+
+AI는 `clean test`와 `build`를 실행하고, 실패가 있으면 새 기능을 추가하지 않고 제출 게이트만
+정상화하도록 요청받았다.
+
+### AI Suggestion
+
+실패 원인을 전용 Mock Supplier가 필요한 E2E 클래스의 일반 `:app:test` 포함과, 두 중첩 모듈의
+동일한 `application.jar` archive 이름으로 분리했다.
+
+### Disposition
+
+MODIFIED
+
+### Human Judgment
+
+사용자는 추가 구현보다 제출 가능 증거를 우선했다. 이에 일반 테스트에서는 `*EndToEndTest`를 제외하고
+전용 E2E 태스크만 해당 클래스를 실행하게 했으며, archive 이름은 Gradle 프로젝트 경로 기반으로
+고유화했다.
+
+### Result
+
+일반 단위·통합 테스트와 외부 Mock Supplier를 요구하는 E2E 테스트의 실행 책임이 분리됐고, Boot JAR가
+중복 library 항목 없이 조립됐다.
+
+### Verification
+
+23개 테스트 리포트의 149개 테스트가 실패·오류 없이 통과했고, `./gradlew.bat build`가
+`BUILD SUCCESSFUL`로 완료됐다.
 

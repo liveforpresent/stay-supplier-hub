@@ -1099,16 +1099,30 @@ PostgreSQL
 
 `:mock-supplier` is a separate executable process.
 
-Contains only the external protocols and required modes:
+Contains only the external protocols and E2E fixture modes:
 
 ```text
 Supplier A endpoints
 Supplier B endpoints
 
-normal
-supplier-error
-no-response
+Availability
+├── normal
+├── supplier-error
+├── no-response
+└── zero-inventory
+
+Supplier A Catalog
+├── normal
+├── supplier-error
+├── supplier-error-after-first-request
+└── configurable property count for batching verification
+
+Supplier B Catalog
+└── normal
 ```
+
+The extra Catalog modes exist only to prove bootstrap baseline and batching behavior. They do not add a production
+Supplier capability or change Catalog synchronization semantics.
 
 Default local port:
 
