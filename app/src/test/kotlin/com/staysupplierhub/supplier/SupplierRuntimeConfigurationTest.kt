@@ -20,7 +20,7 @@ import io.kotest.matchers.shouldBe
 import org.springframework.beans.factory.BeanCreationException
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.support.registerBean
 import org.springframework.core.env.MapPropertySource
 import java.net.InetSocketAddress
@@ -252,7 +252,7 @@ private val supplierBResponse =
       ] }] } }
     """.trimIndent()
 
-@Configuration(proxyBeanMethods = false)
+@TestConfiguration(proxyBeanMethods = false)
 private class MissingCatalogPortConfiguration {
     @Bean
     fun supplierWiringValidator() = SupplierWiringValidator(
@@ -262,7 +262,7 @@ private class MissingCatalogPortConfiguration {
     )
 }
 
-@Configuration(proxyBeanMethods = false)
+@TestConfiguration(proxyBeanMethods = false)
 private class MissingAvailabilityPortConfiguration {
     @Bean
     fun supplierWiringValidator() = SupplierWiringValidator(

@@ -949,3 +949,16 @@ Composition Root가 사용하는 `:search:port`와 Jackson Kotlin 모듈을 `:ap
 timeout 원인 체인을 검사해 Java와 Netty timeout 예외를 모두 `TIMEOUT`으로 정규화했다. 실제
 connected-but-stalled HTTP stub으로 수정 전 실패와 수정 후 통과를 확인했다.
 
+## Day 8 — E2E가 발견한 Mock Supplier 응답 계약 불일치
+
+**Type:** Defect / Test-fixture correction
+
+정상 검색 E2E에서 Catalog 동기화와 readiness는 통과했지만 두 Supplier의 가용성 결과가 모두
+`INVALID_RESPONSE`로 정규화됐다. 원인은 Mock Supplier 가용성 응답에 Catalog 전용 이름·수용 인원
+필드가 함께 포함된 것이었다. Availability adapter의 wire DTO는 해당 필드를 계약으로 갖지 않으며,
+엄격한 역직렬화가 이를 무효 응답으로 처리했다.
+
+Mock 응답을 각 Supplier Availability payload 계약에 정의된 필드만 포함하도록 정정했다. 실제
+`:mock-supplier`, PostgreSQL Testcontainers, `:app`을 함께 기동하는 E2E에서 startup Catalog sync,
+영속된 mapping, `200 COMPLETE`, A/B live Offer를 확인했다.
+

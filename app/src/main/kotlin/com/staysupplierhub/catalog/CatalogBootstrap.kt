@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import org.slf4j.LoggerFactory
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -72,6 +73,7 @@ class SearchReadinessGateFilter(
 
 @Configuration(proxyBeanMethods = false)
 class CatalogBootstrapConfiguration {
+    private val logger = LoggerFactory.getLogger(CatalogBootstrapConfiguration::class.java)
     @Bean
     fun catalogReadiness() = CatalogReadiness()
 
@@ -93,9 +95,12 @@ class CatalogBootstrapConfiguration {
         catalogReadiness: CatalogReadiness,
     ) = ApplicationRunner {
         val unavailable = configuredSupplierIds.filterTo(mutableSetOf()) { supplierId ->
-            when (synchronizeSupplierCatalog.synchronize(supplierId)) {
+            when (val result = synchronizeSupplierCatalog.synchronize(supplierId)) {
                 CatalogSynchronizationResult.Synchronized -> false
-                is CatalogSynchronizationResult.Failed -> !propertyRepository.hasPersistedCatalogState(supplierId)
+                is CatalogSynchronizationResult.Failed -> {
+                    logger.warn("Catalog bootstrap synchronization failed for supplier {}: {}", supplierId.value, result.failure.type)
+                    !propertyRepository.hasPersistedCatalogState(supplierId)
+                }
             }
         }
         catalogReadiness.mark(unavailable)
